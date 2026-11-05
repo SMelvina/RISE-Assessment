@@ -14,12 +14,14 @@ import {
   Download,
   RotateCcw,
   Compass,
+  Play,
 } from 'lucide-react';
 
 interface AdminDashboardProps {
   submissions: ParticipantSubmission[];
   onPreviewSubmission: (submission: ParticipantSubmission) => void;
   onOpenUserAssessment: () => void;
+  onLaunchAdminDemo?: () => void;
   onResetCohortData?: () => void;
 }
 
@@ -27,6 +29,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   submissions,
   onPreviewSubmission,
   onOpenUserAssessment,
+  onLaunchAdminDemo,
   onResetCohortData,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -162,13 +165,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </button>
           )}
 
+          {onLaunchAdminDemo && (
+            <button
+              type="button"
+              onClick={onLaunchAdminDemo}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[16px] bg-[#E39F00] hover:bg-[#C98B00] text-[#011C0E] text-xs font-bold tracking-wide uppercase transition-colors shadow-sm cursor-pointer"
+            >
+              <Play className="w-3.5 h-3.5 fill-current" />
+              <span>Stakeholder Demo (Admin)</span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={onOpenUserAssessment}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[16px] bg-[#024F28] hover:bg-[#013D1F] text-white text-xs font-semibold tracking-wide uppercase transition-colors shadow-sm cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[16px] bg-[#024F28] hover:bg-[#013D1F] text-white text-xs font-semibold tracking-wide uppercase transition-colors shadow-sm cursor-pointer"
           >
             <Compass className="w-4 h-4 text-[#E39F00]" />
-            <span>Open User Assessment</span>
+            <span>Standard User View</span>
           </button>
         </div>
       </header>

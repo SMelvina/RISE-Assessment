@@ -10,6 +10,7 @@ interface WelcomeScreenProps {
   onReset: () => void;
   onHomeClick?: () => void;
   onOpenAdmin?: () => void;
+  onLaunchAdminDemo?: () => void;
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
@@ -19,6 +20,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onReset,
   onHomeClick,
   onOpenAdmin,
+  onLaunchAdminDemo,
 }) => {
   return (
     <div className="relative min-h-screen w-full flex flex-col justify-between overflow-x-hidden bg-[#024F28] text-white select-none">
@@ -113,14 +115,27 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
       {/* Footer */}
       <footer className="relative z-10 w-full px-5 py-4 sm:px-8 md:px-14 lg:px-20 border-t border-white/15 flex items-center justify-between text-xs text-white/70">
         <span>Phoszade &copy; {new Date().getFullYear()} · THE RISE Framework</span>
-        {onOpenAdmin && (
-          <button
-            type="button"
-            onClick={onOpenAdmin}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] bg-white/10 hover:bg-white/20 border border-white/20 text-white/80 hover:text-white transition-all text-xs font-semibold cursor-pointer"
-          >
-            <span>Admin Portal</span>
-          </button>
+        {(onLaunchAdminDemo || onOpenAdmin) && (
+          <div className="flex items-center gap-2">
+            {onLaunchAdminDemo && (
+              <button
+                type="button"
+                onClick={onLaunchAdminDemo}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] bg-[#E39F00]/20 hover:bg-[#E39F00]/30 border border-[#E39F00]/40 text-[#FFCF55] hover:text-white transition-all text-xs font-semibold cursor-pointer"
+              >
+                <span>Stakeholder Demo</span>
+              </button>
+            )}
+            {onOpenAdmin && (
+              <button
+                type="button"
+                onClick={onOpenAdmin}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[12px] bg-white/10 hover:bg-white/20 border border-white/20 text-white/80 hover:text-white transition-all text-xs font-semibold cursor-pointer"
+              >
+                <span>Admin Dashboard</span>
+              </button>
+            )}
+          </div>
         )}
       </footer>
     </div>

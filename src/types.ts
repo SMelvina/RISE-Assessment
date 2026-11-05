@@ -106,6 +106,8 @@ export type ScreenState =
   | 'results'
   | 'admin';
 
+export type ScreenType = ScreenState;
+
 export interface AssessmentState {
   currentScreen: ScreenState;
   participantName: string;

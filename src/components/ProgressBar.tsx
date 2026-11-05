@@ -24,8 +24,8 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   const pillarPercentage = Math.round((currentQuestionInPillar / totalQuestionsInPillar) * 100);
 
   return (
-    <div className="w-full bg-warm-100/90 border-b border-warm-300/80 backdrop-blur-sm sticky top-0 z-30 px-5 py-3 sm:px-8 md:px-14 lg:px-20 transition-all">
-      <div className="w-full flex flex-col gap-2.5">
+    <div className="w-full bg-warm-100/90 border-b border-warm-300/80 backdrop-blur-sm sticky top-0 z-30 px-5 py-2 sm:py-2.5 md:px-14 lg:px-20 transition-all">
+      <div className="w-full flex flex-col gap-1.5 sm:gap-2">
         {/* Top Nav Row: Brand Logo on TOP LEFT + Stage & Overall Progress on RIGHT */}
         <div className="flex items-center justify-between gap-4">
           <BrandLogo variant="dark" size="sm" showSubtitle={true} onClick={onHomeClick} />

@@ -14,6 +14,7 @@ interface QuestionScreenProps {
   onContinue: () => void;
   onBack: () => void;
   onHomeClick?: () => void;
+  isAdminMode?: boolean;
 }
 
 // 5-point Likert response scale (1 = Not true of me to 5 = Completely true of me, left-to-right)
@@ -118,14 +119,14 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
         onHomeClick={onHomeClick}
       />
 
-      {/* Main Question Area matching First Page Spacing */}
-      <main className="flex-1 flex flex-col justify-center px-5 py-8 sm:px-8 md:px-14 lg:px-20 w-full">
-        <div key={question.id} className="max-w-3xl mx-auto w-full animate-screen-in">
+      {/* Main Question Area - Snug Vertical Proportions Fitted Above The Fold */}
+      <main className="flex-1 flex flex-col justify-center px-4 py-2 sm:py-4 md:px-14 lg:px-20 w-full">
+        <div key={question.id} className="max-w-2xl mx-auto w-full animate-screen-in">
           {/* Clear Accessibility & Hierarchical Level Heading */}
-          <div className="text-center mb-8 flex flex-col items-center">
+          <div className="text-center mb-2.5 sm:mb-4 flex flex-col items-center">
             {/* Stage Eyebrow Pill displaying the stage pastel color with >10:1 AAA contrast */}
             <div
-              className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-widest font-mono mb-3 shadow-xs border border-black/10"
+              className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-widest font-mono mb-1.5 shadow-xs border border-black/10"
               style={{
                 backgroundColor: pastel.bg,
                 color: pastel.text,
@@ -138,26 +139,26 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
 
             {/* Authoritative Level Heading in verified WCAG AAA (>= 7.0:1) contrast hue */}
             <h1
-              className="font-sans text-3xl sm:text-4xl md:text-5xl font-black tracking-widest uppercase drop-shadow-xs"
+              className="font-sans text-2xl sm:text-3xl md:text-4xl font-black tracking-widest uppercase drop-shadow-xs mb-1"
               style={{ color: pastel.contrastColor || dim.hex }}
             >
               {pillar.name}
             </h1>
 
-            <span className="text-xs text-charcoal-muted uppercase tracking-widest font-mono mt-2 inline-block font-medium">
+            <span className="text-[11px] sm:text-xs text-charcoal-muted uppercase tracking-widest font-mono font-medium">
               Question {question.questionNumber} of 7
             </span>
           </div>
 
           {/* Diagnostic Question Statement */}
-          <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-normal text-charcoal leading-snug tracking-tight mb-10 text-center">
+          <h2 className="font-serif text-lg sm:text-2xl md:text-3xl font-normal text-charcoal leading-snug tracking-tight mb-3 sm:mb-5 text-center max-w-xl mx-auto">
             "{question.text}"
           </h2>
 
           {/* Number Circles Row (Matching User's Reference Style: 1 to 5 from Left to Right) */}
-          <div className="max-w-2xl mx-auto w-full my-8">
+          <div className="max-w-xl mx-auto w-full my-2 sm:my-3">
             <div
-              className="flex items-center justify-between gap-2.5 sm:gap-4"
+              className="flex items-center justify-between gap-2 sm:gap-3"
               role="radiogroup"
               aria-label="5-point response scale"
             >
@@ -171,7 +172,7 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
                     role="radio"
                     aria-checked={isSelected}
                     onClick={() => handleScoreClick(option.value)}
-                    className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[16px] flex items-center justify-center text-lg sm:text-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer ${
+                    className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-[14px] flex items-center justify-center text-base sm:text-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer ${
                       isSelected
                         ? 'shadow-lg scale-105 ring-2 ring-offset-2 font-bold'
                         : 'bg-white hover:bg-warm-100 text-charcoal border-2 border-warm-300 hover:border-charcoal/50 shadow-xs'
@@ -190,7 +191,7 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
             </div>
 
             {/* Left, Center & Right Labels (Fidelity scale: Not true of me -> Completely true of me) */}
-            <div className="flex items-center justify-between mt-4 px-1 text-xs sm:text-sm font-semibold text-charcoal">
+            <div className="flex items-center justify-between mt-2 px-1 text-xs sm:text-sm font-semibold text-charcoal">
               <span className="text-left leading-tight">Not true of me</span>
               <span className="text-center text-xs text-charcoal-muted font-normal hidden sm:inline">
                 Somewhat true of me
@@ -201,15 +202,15 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
         </div>
       </main>
 
-      {/* Bottom Navigation Bar matching First Page Spacing */}
-      <nav aria-label="Assessment Navigation" className="border-t border-warm-300 bg-warm-100/80 px-5 py-4 sm:px-8 md:px-14 lg:px-20 w-full">
-        <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
+      {/* Bottom Navigation Bar positioned safely above the fold */}
+      <nav aria-label="Assessment Navigation" className="border-t border-warm-300 bg-warm-100/90 px-4 py-2.5 sm:py-3 md:px-14 lg:px-20 w-full">
+        <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
           <button
             type="button"
             onClick={handleManualBack}
-            className="inline-flex items-center gap-2 px-4 py-3 rounded-[16px] border border-warm-300 bg-white hover:bg-warm-200 text-charcoal hover:text-black text-sm font-medium transition-colors group cursor-pointer shadow-xs"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] border border-warm-300 bg-white hover:bg-warm-200 text-charcoal hover:text-black text-xs sm:text-sm font-medium transition-colors group cursor-pointer shadow-xs"
           >
-            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+            <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
             <span>Previous</span>
           </button>
 
@@ -217,7 +218,7 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
             type="button"
             onClick={handleManualContinue}
             disabled={currentScore === undefined}
-            className={`inline-flex items-center gap-2 px-7 py-3 rounded-[16px] text-sm font-semibold transition-all shadow-sm group cursor-pointer border ${
+            className={`inline-flex items-center gap-2 px-6 sm:px-7 py-2.5 rounded-[14px] text-xs sm:text-sm font-semibold transition-all shadow-sm group cursor-pointer border ${
               currentScore === undefined
                 ? 'bg-warm-300 text-charcoal-muted cursor-not-allowed opacity-60 border-warm-300'
                 : 'hover:opacity-95'
@@ -228,8 +229,8 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
               color: currentScore !== undefined ? pastel.text : undefined,
             }}
           >
-            <span>Continue</span>
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            <span>{overallQuestionNumber === totalQuestionsOverall ? 'Complete Assessment' : 'Continue'}</span>
+            <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
           </button>
         </div>
       </nav>

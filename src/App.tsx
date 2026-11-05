@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { AssessmentState, ScoreValue } from './types';
 import { PILLARS } from './data/pillars';
 import { getQuestionsByPillar, getOverallQuestionNumber, QUESTION_BANK } from './data/questionBank';
@@ -76,6 +76,24 @@ export function App() {
     return loaded;
   });
 
+  // Admin Mode state: enables free left/right arrow navigation on desktop and pre-filled answers for mobile demo
+  const [isAdminMode, setIsAdminMode] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return (
+        urlParams.get('mode') === 'admin' ||
+        urlParams.get('admin') === 'true' ||
+        window.location.hash.includes('admin-demo')
+      );
+    }
+    return false;
+  });
+
+  const isAdminModeRef = useRef(isAdminMode);
+  useEffect(() => {
+    isAdminModeRef.current = isAdminMode;
+  }, [isAdminMode]);
+
   // Automatically save state on changes
   useEffect(() => {
     saveAssessmentState(state);
@@ -89,6 +107,16 @@ export function App() {
         urlParams.get('view') ||
         urlParams.get('screen') ||
         window.location.hash.replace('#', '');
+
+      if (
+        urlParams.get('mode') === 'admin' ||
+        urlParams.get('admin') === 'true' ||
+        window.location.hash.includes('admin-demo')
+      ) {
+        setIsAdminMode(true);
+      } else if (urlParams.get('mode') === 'user') {
+        setIsAdminMode(false);
+      }
 
       if (view === 'admin') {
         setState((prev) => ({
@@ -145,12 +173,31 @@ export function App() {
     }));
   }, []);
 
-  const handleOpenUserAssessment = useCallback(() => {
+  const handleLaunchAdminDemo = useCallback(() => {
+    setIsAdminMode(true);
     setAdminPreviewActive(false);
     setState((prev) => ({
       ...prev,
+      participantName: 'Stakeholder',
       currentScreen: 'welcome',
     }));
+  }, []);
+
+  const handleSwitchToUserMode = useCallback(() => {
+    setIsAdminMode(false);
+    if (typeof window !== 'undefined' && window.history) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('mode');
+      url.searchParams.delete('admin');
+      window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
+    }
+  }, []);
+
+  const handleOpenUserAssessment = useCallback(() => {
+    setIsAdminMode(false);
+    setAdminPreviewActive(false);
+    clearAssessmentState();
+    setState(INITIAL_STATE);
   }, []);
 
   const handlePreviewSubmission = useCallback((sub: ParticipantSubmission) => {
@@ -277,14 +324,25 @@ export function App() {
       const currentQuestions = getQuestionsByPillar(PILLARS[prev.currentPillarIndex].id);
       const currentQ = currentQuestions[prev.currentQuestionIndex];
 
-      // Strictly require a response before moving to the next question!
-      if (!prev.responses[currentQ.id]) {
+      const benchmarkScore = getBenchmarkResponses()[currentQ.id] || 4;
+      const score = isAdminModeRef.current
+        ? (prev.responses[currentQ.id] ?? benchmarkScore)
+        : prev.responses[currentQ.id];
+
+      // Strictly require a response before moving to the next question in user view
+      if (!score) {
         return prev;
       }
+
+      const updatedResponses = {
+        ...prev.responses,
+        [currentQ.id]: score,
+      };
 
       if (prev.currentQuestionIndex < currentQuestions.length - 1) {
         return {
           ...prev,
+          responses: updatedResponses,
           currentQuestionIndex: prev.currentQuestionIndex + 1,
         };
       }
@@ -293,6 +351,7 @@ export function App() {
       if (prev.currentPillarIndex < PILLARS.length - 1) {
         return {
           ...prev,
+          responses: updatedResponses,
           currentPillarIndex: prev.currentPillarIndex + 1,
           currentQuestionIndex: 0,
           currentScreen: 'pillar_intro',
@@ -302,6 +361,7 @@ export function App() {
       // Completed final pillar
       return {
         ...prev,
+        responses: updatedResponses,
         completedAt: new Date().toISOString(),
         currentScreen: 'processing',
       };
@@ -355,17 +415,96 @@ export function App() {
         e.preventDefault();
 
         setState((prev) => {
+          if (isAdminModeRef.current) {
+            // ADMIN VIEW: Free navigation across all screens for stakeholder demo
+            switch (prev.currentScreen) {
+              case 'welcome':
+                return {
+                  ...prev,
+                  currentScreen: 'personalisation',
+                  participantName: 'Stakeholder',
+                };
+
+              case 'personalisation':
+                return {
+                  ...prev,
+                  participantName: prev.participantName.trim() || 'Stakeholder',
+                  startedAt: prev.startedAt || new Date().toISOString(),
+                  currentScreen: 'pillar_intro',
+                  currentPillarIndex: 0,
+                  currentQuestionIndex: 0,
+                };
+
+              case 'pillar_intro':
+                return {
+                  ...prev,
+                  currentScreen: 'question',
+                  currentQuestionIndex: 0,
+                };
+
+              case 'question': {
+                const currentPillar = PILLARS[prev.currentPillarIndex];
+                const questions = getQuestionsByPillar(currentPillar.id);
+                const currentQ = questions[prev.currentQuestionIndex];
+                const benchmarkScore = getBenchmarkResponses()[currentQ.id] || 4;
+                const score = prev.responses[currentQ.id] ?? benchmarkScore;
+
+                const updatedResponses = {
+                  ...prev.responses,
+                  [currentQ.id]: score,
+                };
+
+                if (prev.currentQuestionIndex < questions.length - 1) {
+                  return {
+                    ...prev,
+                    responses: updatedResponses,
+                    currentQuestionIndex: prev.currentQuestionIndex + 1,
+                  };
+                }
+
+                // Completed all 7 questions in this pillar -> go directly to next pillar intro
+                if (prev.currentPillarIndex < PILLARS.length - 1) {
+                  return {
+                    ...prev,
+                    responses: updatedResponses,
+                    currentPillarIndex: prev.currentPillarIndex + 1,
+                    currentQuestionIndex: 0,
+                    currentScreen: 'pillar_intro',
+                  };
+                }
+
+                // Completed 63rd question
+                return {
+                  ...prev,
+                  responses: updatedResponses,
+                  completedAt: new Date().toISOString(),
+                  currentScreen: 'processing',
+                };
+              }
+
+              case 'processing':
+                return {
+                  ...prev,
+                  currentScreen: 'results',
+                };
+
+              case 'results':
+                return prev;
+
+              default:
+                return prev;
+            }
+          }
+
+          // USER VIEW: Standard assessment requiring answers
           switch (prev.currentScreen) {
             case 'welcome':
-              return {
-                ...prev,
-                currentScreen: 'personalisation',
-              };
+              return prev; // User must click "Begin your journey"
 
             case 'personalisation':
+              if (!prev.participantName.trim()) return prev;
               return {
                 ...prev,
-                participantName: prev.participantName.trim() || 'Somtochukwu',
                 startedAt: prev.startedAt || new Date().toISOString(),
                 currentScreen: 'pillar_intro',
                 currentPillarIndex: 0,
@@ -384,7 +523,7 @@ export function App() {
               const questions = getQuestionsByPillar(currentPillar.id);
               const currentQ = questions[prev.currentQuestionIndex];
 
-              // Require response: cannot advance forward unless the question has been answered!
+              // Require response: cannot advance forward unless answered
               if (!prev.responses[currentQ.id]) {
                 return prev;
               }
@@ -518,6 +657,7 @@ export function App() {
             submissions={submissions}
             onPreviewSubmission={handlePreviewSubmission}
             onOpenUserAssessment={handleOpenUserAssessment}
+            onLaunchAdminDemo={handleLaunchAdminDemo}
             onResetCohortData={handleResetCohortData}
           />
         );
@@ -530,14 +670,15 @@ export function App() {
             onResume={handleResume}
             onReset={handleReset}
             onHomeClick={handleLogoClick}
-            onOpenAdmin={handleOpenAdmin}
+            onOpenAdmin={isAdminMode ? handleOpenAdmin : undefined}
+            onLaunchAdminDemo={isAdminMode ? handleLaunchAdminDemo : undefined}
           />
         );
 
       case 'personalisation':
         return (
           <PersonalisationScreen
-            initialName={state.participantName}
+            initialName={isAdminMode ? (state.participantName || 'Stakeholder') : state.participantName}
             onContinue={handlePersonalisationContinue}
             onBack={handlePersonalisationBack}
             onHomeClick={handleLogoClick}
@@ -556,7 +697,11 @@ export function App() {
         );
 
       case 'question': {
-        const currentScore = state.responses[currentQuestion.id];
+        const benchmarkScore = getBenchmarkResponses()[currentQuestion.id] || 4;
+        const currentScore = isAdminMode
+          ? (state.responses[currentQuestion.id] ?? benchmarkScore)
+          : state.responses[currentQuestion.id];
+
         return (
           <QuestionScreen
             question={currentQuestion}
@@ -568,6 +713,7 @@ export function App() {
             onContinue={handleQuestionContinue}
             onBack={handleQuestionBack}
             onHomeClick={handleLogoClick}
+            isAdminMode={isAdminMode}
           />
         );
       }
@@ -625,7 +771,8 @@ export function App() {
             onResume={handleResume}
             onReset={handleReset}
             onHomeClick={handleLogoClick}
-            onOpenAdmin={handleOpenAdmin}
+            onOpenAdmin={isAdminMode ? handleOpenAdmin : undefined}
+            onLaunchAdminDemo={isAdminMode ? handleLaunchAdminDemo : undefined}
           />
         );
     }
@@ -635,11 +782,46 @@ export function App() {
     state.currentScreen === 'pillar_intro'
       ? `pillar_intro-${currentPillar.id}`
       : state.currentScreen === 'question'
-      ? `question-${currentPillar.id}`
-      : state.currentScreen;
+        ? `question-${currentPillar.id}`
+        : state.currentScreen;
 
   return (
     <>
+      {isAdminMode && (
+        <aside
+          aria-label="Admin Stakeholder Mode"
+          className="sticky top-0 z-50 w-full bg-[#012613] text-white border-b border-[#024F28] px-4 py-2 sm:px-8 flex items-center justify-between text-xs shadow-md"
+        >
+          <div className="flex items-center gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-[#E39F00] animate-pulse" />
+            <span className="font-mono font-bold tracking-wider uppercase text-[#E39F00]">
+              Admin Stakeholder View
+            </span>
+            <span className="hidden md:inline text-white/70">
+              · Use <kbd className="px-1.5 py-0.5 rounded bg-white/10 font-mono text-[10px]">←</kbd> <kbd className="px-1.5 py-0.5 rounded bg-white/10 font-mono text-[10px]">→</kbd> keys to navigate · Pre-filled for mobile demo
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {state.currentScreen !== 'admin' && (
+              <button
+                type="button"
+                onClick={handleOpenAdmin}
+                className="px-3 py-1 rounded-[10px] bg-[#E39F00]/20 hover:bg-[#E39F00]/30 text-[#FFCF55] font-medium text-xs transition-colors cursor-pointer"
+              >
+                Telemetry Dashboard
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleSwitchToUserMode}
+              className="px-3 py-1 rounded-[10px] bg-white/10 hover:bg-white/20 text-white font-medium text-xs transition-colors cursor-pointer"
+            >
+              Exit to Standard User View
+            </button>
+          </div>
+        </aside>
+      )}
+
       <div key={screenTransitionKey} className="w-full min-h-screen animate-screen-in flex flex-col">
         {renderScreen()}
       </div>

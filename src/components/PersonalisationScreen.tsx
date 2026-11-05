@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, User } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 
@@ -17,6 +17,12 @@ export const PersonalisationScreen: React.FC<PersonalisationScreenProps> = ({
 }) => {
   const [name, setName] = useState(initialName);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialName) {
+      setName(initialName);
+    }
+  }, [initialName]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
