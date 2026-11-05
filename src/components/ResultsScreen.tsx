@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AssessmentResult } from '../types';
 import { DIMENSIONS } from '../data/dimensions';
 import { PILLARS } from '../data/pillars';
@@ -611,38 +612,41 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
         </div>
       </main>
 
-      {/* Confirmation Modal for Retake Assessment */}
-      {showRetakeConfirm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 sm:p-7 shadow-xl border border-warm-300 space-y-4">
-            <h3 className="font-serif text-xl font-bold text-charcoal">
-              Retake Assessment?
-            </h3>
-            <p className="text-sm text-charcoal-muted leading-relaxed font-sans">
-              This will reset your saved answers and return you to the beginning of the RISE assessment. Are you sure you wish to restart?
-            </p>
-            <div className="flex items-center justify-end gap-3 pt-3">
-              <button
-                type="button"
-                onClick={() => setShowRetakeConfirm(false)}
-                className="px-4 py-2.5 rounded-[16px] border border-warm-300 text-charcoal text-xs font-semibold tracking-wide uppercase hover:bg-warm-100 transition-colors cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowRetakeConfirm(false);
-                  onRetake();
-                }}
-                className="px-5 py-2.5 rounded-[16px] bg-red-700 text-white text-xs font-semibold tracking-wide uppercase hover:bg-red-800 transition-colors shadow-sm cursor-pointer"
-              >
-                Reset and Retake
-              </button>
+      {/* Confirmation Modal for Retake Assessment - Rendered directly onto document.body to center in the viewport */}
+      {showRetakeConfirm &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-warm-300 space-y-4">
+              <h3 className="font-serif text-xl font-bold text-charcoal">
+                Retake Assessment?
+              </h3>
+              <p className="text-sm text-charcoal-muted leading-relaxed font-sans">
+                This will reset your saved answers and return you to the beginning of the RISE assessment. Are you sure you wish to restart?
+              </p>
+              <div className="flex items-center justify-end gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowRetakeConfirm(false)}
+                  className="px-4 py-2.5 rounded-[16px] border border-warm-300 text-charcoal text-xs font-semibold tracking-wide uppercase hover:bg-warm-100 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowRetakeConfirm(false);
+                    onRetake();
+                  }}
+                  className="px-5 py-2.5 rounded-[16px] bg-red-700 text-white text-xs font-semibold tracking-wide uppercase hover:bg-red-800 transition-colors shadow-sm cursor-pointer"
+                >
+                  Reset and Retake
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
 
       {/* Footer matching First Page Spacing */}
       <footer className="w-full px-5 py-4 sm:px-8 md:px-14 lg:px-20 border-t border-warm-300 text-xs text-charcoal-muted flex flex-col sm:flex-row items-center justify-between gap-2 print:hidden">

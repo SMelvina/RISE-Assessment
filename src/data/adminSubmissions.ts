@@ -1,7 +1,7 @@
 import { ScoreValue } from '../types';
 import { QUESTION_BANK } from './questionBank';
 import { calculateAssessmentResults } from '../utils/scoring';
-import { syncSubmissionToSupabase } from '../utils/supabase';
+import { syncSubmissionToSupabase, isSupabaseConfigured } from '../utils/supabase';
 
 export interface ParticipantSubmission {
   id: string;
@@ -181,19 +181,33 @@ export function getInitialSubmissions(): ParticipantSubmission[] {
 const ADMIN_STORAGE_KEY = 'rise_admin_cohort_submissions_v1';
 
 export function loadAllSubmissions(): ParticipantSubmission[] {
-  if (typeof window === 'undefined') return getInitialSubmissions();
+  if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(ADMIN_STORAGE_KEY);
     if (!raw) {
+      if (isSupabaseConfigured()) {
+        return [];
+      }
       const initial = getInitialSubmissions();
       saveAllSubmissions(initial);
       return initial;
     }
-    return JSON.parse(raw);
+    const parsed: ParticipantSubmission[] = JSON.parse(raw);
+    if (isSupabaseConfigured()) {
+      return parsed.filter((s) => !s.id.match(/^sub-00[0-9]|^sub-01[0-2]/));
+    }
+    return parsed;
   } catch (e) {
     console.error('Error loading admin submissions:', e);
-    return getInitialSubmissions();
+    return [];
   }
+}
+
+export function clearAllDemoSubmissions(): void {
+  if (typeof window === 'undefined') return;
+  const current = loadAllSubmissions();
+  const realOnly = current.filter((s) => !s.id.match(/^sub-00[0-9]|^sub-01[0-2]/));
+  saveAllSubmissions(realOnly);
 }
 
 export function saveAllSubmissions(submissions: ParticipantSubmission[]): void {

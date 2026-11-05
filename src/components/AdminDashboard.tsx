@@ -15,26 +15,31 @@ import {
   Download,
   RotateCcw,
   Compass,
-  Play,
 } from 'lucide-react';
 
 interface AdminDashboardProps {
   submissions: ParticipantSubmission[];
   onPreviewSubmission: (submission: ParticipantSubmission) => void;
   onOpenUserAssessment: () => void;
-  onLaunchAdminDemo?: () => void;
   onResetCohortData?: () => void;
+  onClearDemoData?: () => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   submissions,
   onPreviewSubmission,
   onOpenUserAssessment,
-  onLaunchAdminDemo,
   onResetCohortData,
+  onClearDemoData,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDimension, setSelectedDimension] = useState<string>('ALL');
+
+  // Check if any mock demo seed profiles are in the cohort
+  const hasDemoSubmissions = useMemo(
+    () => submissions.some((s) => s.id.match(/^sub-00[0-9]|^sub-01[0-2]/)),
+    [submissions]
+  );
 
   // Aggregated Analytics
   const totalUsers = submissions.length;
@@ -73,6 +78,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Most common stage
   const mostCommonStage = useMemo(() => {
+    if (totalUsers === 0) return null;
     let topStageNum = 1;
     let maxCount = -1;
     Object.entries(stageDistribution).forEach(([stageNum, count]) => {
@@ -83,7 +89,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     });
     const pillar = PILLARS.find((p) => p.number === topStageNum) || PILLARS[0];
     return { pillar, count: maxCount };
-  }, [stageDistribution]);
+  }, [stageDistribution, totalUsers]);
 
   // Filtered Submissions
   const filteredSubmissions = useMemo(() => {
@@ -155,25 +161,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <span>Export CSV</span>
           </button>
 
-          {onResetCohortData && (
+          {hasDemoSubmissions && onClearDemoData && (
             <button
               type="button"
-              onClick={onResetCohortData}
-              title="Reset to default seed cohort data"
-              className="inline-flex items-center gap-2 px-3 py-2.5 rounded-[16px] border border-warm-300 bg-warm-100 hover:bg-warm-200 text-charcoal text-xs font-semibold tracking-wide uppercase transition-colors cursor-pointer"
+              onClick={onClearDemoData}
+              title="Remove sample demo responses to view only real live data"
+              className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-[16px] border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold tracking-wide uppercase transition-colors shadow-xs cursor-pointer"
             >
-              <RotateCcw className="w-4 h-4 text-charcoal-muted" />
+              <span>Clear Demo Data</span>
             </button>
           )}
 
-          {onLaunchAdminDemo && (
+          {!hasDemoSubmissions && onResetCohortData && (
             <button
               type="button"
-              onClick={onLaunchAdminDemo}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[16px] bg-[#E39F00] hover:bg-[#C98B00] text-[#011C0E] text-xs font-bold tracking-wide uppercase transition-colors shadow-sm cursor-pointer"
+              onClick={onResetCohortData}
+              title="Refresh live cloud submissions from Supabase"
+              className="inline-flex items-center gap-2 px-3 py-2.5 rounded-[16px] border border-warm-300 bg-warm-100 hover:bg-warm-200 text-charcoal text-xs font-semibold tracking-wide uppercase transition-colors cursor-pointer"
             >
-              <Play className="w-3.5 h-3.5 fill-current" />
-              <span>Stakeholder Demo (Admin)</span>
+              <RotateCcw className="w-4 h-4 text-charcoal-muted" />
+              <span>Refresh</span>
             </button>
           )}
 
@@ -270,10 +277,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
             <div>
               <div className="text-2xl sm:text-3xl font-bold font-serif text-charcoal mb-1 truncate">
-                0{mostCommonStage.pillar.number} · {mostCommonStage.pillar.name}
+                {mostCommonStage ? `0${mostCommonStage.pillar.number} · ${mostCommonStage.pillar.name}` : '—'}
               </div>
               <span className="text-xs text-charcoal-muted font-medium">
-                {mostCommonStage.count} participants ({totalUsers > 0 ? Math.round((mostCommonStage.count / totalUsers) * 100) : 0}%) currently active here
+                {mostCommonStage
+                  ? `${mostCommonStage.count} participants (${totalUsers > 0 ? Math.round((mostCommonStage.count / totalUsers) * 100) : 0}%) currently active here`
+                  : 'Waiting for live assessment submissions'}
               </span>
             </div>
           </div>
@@ -290,10 +299,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
             <div>
               <div className="text-4xl sm:text-5xl font-bold font-serif text-charcoal mb-1">
-                100%
+                {totalUsers > 0 ? '100%' : '0%'}
               </div>
               <span className="text-xs text-emerald-700 font-semibold">
-                63 / 63 questions required
+                {totalUsers > 0 ? '63 / 63 questions required' : 'Awaiting Submissions'}
               </span>
             </div>
           </div>
@@ -480,8 +489,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <tbody className="divide-y divide-warm-200 text-sm">
                 {filteredSubmissions.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-charcoal-muted text-sm">
-                      No participant submissions match your current search criteria.
+                    <td colSpan={6} className="py-14 text-center text-charcoal-muted text-sm">
+                      <div className="max-w-md mx-auto space-y-2">
+                        <div className="w-10 h-10 rounded-full bg-warm-200 text-charcoal flex items-center justify-center mx-auto mb-3">
+                          <Users className="w-5 h-5 text-charcoal-muted" />
+                        </div>
+                        <p className="font-semibold text-charcoal text-base">
+                          {totalUsers === 0
+                            ? 'No live assessment submissions yet'
+                            : 'No participant submissions match your current search criteria'}
+                        </p>
+                        <p className="text-xs text-charcoal-muted max-w-sm mx-auto leading-relaxed">
+                          {totalUsers === 0
+                            ? 'Share your public assessment link with candidates. When they complete the assessment, their live diagnostic profiles will automatically appear here.'
+                            : 'Try adjusting your search terms or dimension filters.'}
+                        </p>
+                      </div>
                     </td>
                   </tr>
                 ) : (

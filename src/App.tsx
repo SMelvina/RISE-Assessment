@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { AssessmentState, ScoreValue } from './types';
 import { PILLARS } from './data/pillars';
 import { getQuestionsByPillar, getOverallQuestionNumber, QUESTION_BANK } from './data/questionBank';
@@ -22,6 +23,7 @@ import {
   recordNewSubmission,
   saveAllSubmissions,
   getInitialSubmissions,
+  clearAllDemoSubmissions,
   ParticipantSubmission,
 } from './data/adminSubmissions';
 import { fetchSubmissionsFromSupabase, isSupabaseConfigured } from './utils/supabase';
@@ -73,8 +75,16 @@ export function App() {
           currentScreen: 'results',
         };
       }
+
+      // If URL does NOT have view=admin, NEVER open to 'admin'
+      if (loaded.currentScreen === 'admin') {
+        return {
+          ...loaded,
+          currentScreen: 'welcome',
+        };
+      }
     }
-    return loaded;
+    return loaded.currentScreen === 'admin' ? { ...loaded, currentScreen: 'welcome' } : loaded;
   });
 
   // Admin Mode state: enables free left/right arrow navigation on desktop and pre-filled answers for mobile demo
@@ -136,12 +146,19 @@ export function App() {
           responses: getBenchmarkResponses(),
           currentScreen: 'results',
         }));
-      } else if (view === 'welcome') {
-        setState((prev) => ({
-          ...prev,
-          currentScreen: 'welcome',
-        }));
+        return;
       }
+
+      // If URL does not have view=admin, ensure currentScreen is never stuck on 'admin'
+      setState((prev) => {
+        if (prev.currentScreen === 'admin' || view === 'welcome') {
+          return {
+            ...prev,
+            currentScreen: 'welcome',
+          };
+        }
+        return prev;
+      });
     };
 
     window.addEventListener('popstate', handleUrlNavigation);
@@ -166,20 +183,12 @@ export function App() {
   useEffect(() => {
     if (isSupabaseConfigured()) {
       fetchSubmissionsFromSupabase().then((cloudSubs) => {
-        if (cloudSubs && cloudSubs.length > 0) {
-          setSubmissions((prev) => {
-            const map = new Map<string, ParticipantSubmission>();
-            cloudSubs.forEach((s) => map.set(s.id, s));
-            prev.forEach((s) => {
-              if (!map.has(s.id)) map.set(s.id, s);
-            });
-            const merged = Array.from(map.values()).sort(
-              (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
-            );
-            saveAllSubmissions(merged);
-            return merged;
-          });
-        }
+        // Exclude sample demo seed submissions and display only real submissions
+        const realSubs = (cloudSubs || []).filter(
+          (s) => !s.id.match(/^sub-00[0-9]|^sub-01[0-2]/)
+        );
+        setSubmissions(realSubs);
+        saveAllSubmissions(realSubs);
       });
     }
   }, [state.currentScreen]);
@@ -212,14 +221,19 @@ export function App() {
       const url = new URL(window.location.href);
       url.searchParams.delete('mode');
       url.searchParams.delete('admin');
+      url.searchParams.delete('view');
       window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
     }
+    setState((prev) => (prev.currentScreen === 'admin' ? { ...prev, currentScreen: 'welcome' } : prev));
   }, []);
 
   const handleOpenUserAssessment = useCallback(() => {
     setIsAdminMode(false);
     setAdminPreviewActive(false);
     clearAssessmentState();
+    if (typeof window !== 'undefined' && window.history) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
     setState(INITIAL_STATE);
   }, []);
 
@@ -244,9 +258,24 @@ export function App() {
   }, []);
 
   const handleResetCohortData = useCallback(() => {
-    const fresh = getInitialSubmissions();
-    saveAllSubmissions(fresh);
-    setSubmissions(fresh);
+    if (isSupabaseConfigured()) {
+      fetchSubmissionsFromSupabase().then((cloudSubs) => {
+        const realSubs = (cloudSubs || []).filter(
+          (s) => !s.id.match(/^sub-00[0-9]|^sub-01[0-2]/)
+        );
+        setSubmissions(realSubs);
+        saveAllSubmissions(realSubs);
+      });
+    } else {
+      const fresh = getInitialSubmissions();
+      saveAllSubmissions(fresh);
+      setSubmissions(fresh);
+    }
+  }, []);
+
+  const handleClearDemoData = useCallback(() => {
+    clearAllDemoSubmissions();
+    setSubmissions((prev) => prev.filter((s) => !s.id.match(/^sub-00[0-9]|^sub-01[0-2]/)));
   }, []);
 
   // Logo click handler: Return to home, prompting confirmation if responses exist
@@ -680,8 +709,8 @@ export function App() {
             submissions={submissions}
             onPreviewSubmission={handlePreviewSubmission}
             onOpenUserAssessment={handleOpenUserAssessment}
-            onLaunchAdminDemo={handleLaunchAdminDemo}
             onResetCohortData={handleResetCohortData}
+            onClearDemoData={handleClearDemoData}
           />
         );
 
@@ -850,7 +879,7 @@ export function App() {
       </div>
 
       {/* Confirmation Modal when clicking logo with active assessment responses */}
-      {showHomeConfirmModal && (
+      {showHomeConfirmModal && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-warm-300 space-y-4 text-charcoal">
             <h3 className="font-serif text-xl font-bold text-charcoal">
@@ -876,7 +905,8 @@ export function App() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
