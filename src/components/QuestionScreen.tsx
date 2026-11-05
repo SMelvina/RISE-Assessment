@@ -1,0 +1,238 @@
+import React, { useEffect, useCallback, useRef } from 'react';
+import { DiagnosticQuestion, Pillar, ScoreValue } from '../types';
+import { DIMENSIONS, PILLAR_PASTELS } from '../data/dimensions';
+import { ProgressBar } from './ProgressBar';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+
+interface QuestionScreenProps {
+  question: DiagnosticQuestion;
+  pillar: Pillar;
+  overallQuestionNumber: number; // 1 to 63
+  totalQuestionsOverall?: number; // 63
+  currentScore: ScoreValue | undefined;
+  onSelectScore: (score: ScoreValue) => void;
+  onContinue: () => void;
+  onBack: () => void;
+  onHomeClick?: () => void;
+}
+
+// 5-point Likert response scale (1 = Not true of me to 5 = Completely true of me, left-to-right)
+const SCALE_OPTIONS: { value: ScoreValue; label: string; subtext: string }[] = [
+  { value: 1, label: 'Not true of me', subtext: 'No demonstrated evidence or activity' },
+  { value: 2, label: 'Rarely true of me', subtext: 'Rare or very inconsistent practice' },
+  { value: 3, label: 'Somewhat true of me', subtext: 'Partial progress or neutral status' },
+  { value: 4, label: 'Mostly true of me', subtext: 'Regular, demonstrated capability' },
+  { value: 5, label: 'Completely true of me', subtext: 'Mature, consistent and proven practice' },
+];
+
+export const QuestionScreen: React.FC<QuestionScreenProps> = ({
+  question,
+  pillar,
+  overallQuestionNumber,
+  totalQuestionsOverall = 63,
+  currentScore,
+  onSelectScore,
+  onContinue,
+  onBack,
+  onHomeClick,
+}) => {
+  const dim = DIMENSIONS[pillar.dimension];
+  const pastel = PILLAR_PASTELS[pillar.number] || {
+    bg: dim.hex,
+    text: '#0C2819',
+    name: pillar.name,
+    dimensionId: pillar.dimension,
+  };
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Clears any pending auto-advance timer
+  const clearAutoAdvanceTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  // Cleanup timer on unmount or question change
+  useEffect(() => {
+    return () => {
+      clearAutoAdvanceTimer();
+    };
+  }, [question.id, clearAutoAdvanceTimer]);
+
+  // Handler for selecting a score (with 0.50s / 500ms auto-advance)
+  const handleScoreClick = useCallback(
+    (score: ScoreValue) => {
+      onSelectScore(score);
+
+      clearAutoAdvanceTimer();
+      timerRef.current = setTimeout(() => {
+        onContinue();
+      }, 500); // 0.50s auto-advance delay after option selection
+    },
+    [onSelectScore, onContinue, clearAutoAdvanceTimer]
+  );
+
+  const handleManualContinue = useCallback(() => {
+    clearAutoAdvanceTimer();
+    onContinue();
+  }, [clearAutoAdvanceTimer, onContinue]);
+
+  const handleManualBack = useCallback(() => {
+    clearAutoAdvanceTimer();
+    onBack();
+  }, [clearAutoAdvanceTimer, onBack]);
+
+  // Keyboard shortcut listener: 1-5 to select + auto-advance, Enter to continue immediately
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+
+      const num = parseInt(e.key, 10);
+      if (num >= 1 && num <= 5) {
+        e.preventDefault();
+        handleScoreClick(num as ScoreValue);
+      } else if (e.key === 'Enter' && currentScore !== undefined) {
+        e.preventDefault();
+        handleManualContinue();
+      }
+    },
+    [currentScore, handleScoreClick, handleManualContinue]
+  );
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
+
+  return (
+    <div className="min-h-screen w-full bg-warm-50 text-charcoal flex flex-col justify-between">
+      {/* Sticky Top Progress Bar */}
+      <ProgressBar
+        currentQuestionOverall={overallQuestionNumber}
+        totalQuestionsOverall={totalQuestionsOverall}
+        currentQuestionInPillar={question.questionNumber}
+        totalQuestionsInPillar={7}
+        pillarName={pillar.name}
+        dimensionHex={pastel.contrastColor || dim.hex}
+        onHomeClick={onHomeClick}
+      />
+
+      {/* Main Question Area matching First Page Spacing */}
+      <main className="flex-1 flex flex-col justify-center px-5 py-8 sm:px-8 md:px-14 lg:px-20 w-full">
+        <div key={question.id} className="max-w-3xl mx-auto w-full animate-screen-in">
+          {/* Clear Accessibility & Hierarchical Level Heading */}
+          <div className="text-center mb-8 flex flex-col items-center">
+            {/* Stage Eyebrow Pill displaying the stage pastel color with >10:1 AAA contrast */}
+            <div
+              className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-widest font-mono mb-3 shadow-xs border border-black/10"
+              style={{
+                backgroundColor: pastel.bg,
+                color: pastel.text,
+              }}
+            >
+              <span>Stage 0{pillar.number}</span>
+              <span className="opacity-40">·</span>
+              <span>{dim.name}</span>
+            </div>
+
+            {/* Authoritative Level Heading in verified WCAG AAA (>= 7.0:1) contrast hue */}
+            <h1
+              className="font-sans text-3xl sm:text-4xl md:text-5xl font-black tracking-widest uppercase drop-shadow-xs"
+              style={{ color: pastel.contrastColor || dim.hex }}
+            >
+              {pillar.name}
+            </h1>
+
+            <span className="text-xs text-charcoal-muted uppercase tracking-widest font-mono mt-2 inline-block font-medium">
+              Question {question.questionNumber} of 7
+            </span>
+          </div>
+
+          {/* Diagnostic Question Statement */}
+          <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-normal text-charcoal leading-snug tracking-tight mb-10 text-center">
+            "{question.text}"
+          </h2>
+
+          {/* Number Circles Row (Matching User's Reference Style: 1 to 5 from Left to Right) */}
+          <div className="max-w-2xl mx-auto w-full my-8">
+            <div
+              className="flex items-center justify-between gap-2.5 sm:gap-4"
+              role="radiogroup"
+              aria-label="5-point response scale"
+            >
+              {SCALE_OPTIONS.map((option) => {
+                const isSelected = currentScore === option.value;
+
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    onClick={() => handleScoreClick(option.value)}
+                    className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[16px] flex items-center justify-center text-lg sm:text-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer ${
+                      isSelected
+                        ? 'shadow-lg scale-105 ring-2 ring-offset-2 font-bold'
+                        : 'bg-white hover:bg-warm-100 text-charcoal border-2 border-warm-300 hover:border-charcoal/50 shadow-xs'
+                    }`}
+                    style={{
+                      backgroundColor: isSelected ? pastel.bg : undefined,
+                      borderColor: isSelected ? pastel.contrastColor : undefined,
+                      color: isSelected ? pastel.text : undefined,
+                      boxShadow: isSelected ? `0 10px 25px -5px ${pastel.contrastColor}40` : undefined,
+                    }}
+                  >
+                    {option.value}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Left, Center & Right Labels (Fidelity scale: Not true of me -> Completely true of me) */}
+            <div className="flex items-center justify-between mt-4 px-1 text-xs sm:text-sm font-semibold text-charcoal">
+              <span className="text-left leading-tight">Not true of me</span>
+              <span className="text-center text-xs text-charcoal-muted font-normal hidden sm:inline">
+                Somewhat true of me
+              </span>
+              <span className="text-right leading-tight">Completely true of me</span>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Bottom Navigation Bar matching First Page Spacing */}
+      <nav aria-label="Assessment Navigation" className="border-t border-warm-300 bg-warm-100/80 px-5 py-4 sm:px-8 md:px-14 lg:px-20 w-full">
+        <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
+          <button
+            type="button"
+            onClick={handleManualBack}
+            className="inline-flex items-center gap-2 px-4 py-3 rounded-[16px] border border-warm-300 bg-white hover:bg-warm-200 text-charcoal hover:text-black text-sm font-medium transition-colors group cursor-pointer shadow-xs"
+          >
+            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+            <span>Previous</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleManualContinue}
+            disabled={currentScore === undefined}
+            className={`inline-flex items-center gap-2 px-7 py-3 rounded-[16px] text-sm font-semibold transition-all shadow-sm group cursor-pointer border ${
+              currentScore === undefined
+                ? 'bg-warm-300 text-charcoal-muted cursor-not-allowed opacity-60 border-warm-300'
+                : 'hover:opacity-95'
+            }`}
+            style={{
+              backgroundColor: currentScore !== undefined ? pastel.bg : undefined,
+              borderColor: currentScore !== undefined ? pastel.contrastColor : undefined,
+              color: currentScore !== undefined ? pastel.text : undefined,
+            }}
+          >
+            <span>Continue</span>
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+          </button>
+        </div>
+      </nav>
+    </div>
+  );
+};
