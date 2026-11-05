@@ -1,6 +1,7 @@
 import { ScoreValue } from '../types';
 import { QUESTION_BANK } from './questionBank';
 import { calculateAssessmentResults } from '../utils/scoring';
+import { syncSubmissionToSupabase } from '../utils/supabase';
 
 export interface ParticipantSubmission {
   id: string;
@@ -232,5 +233,9 @@ export function recordNewSubmission(
   const existing = loadAllSubmissions();
   const updated = [newSubmission, ...existing.filter((s) => s.participantName !== participantName)];
   saveAllSubmissions(updated);
+
+  // Sync to Supabase cloud if configured
+  syncSubmissionToSupabase(newSubmission);
+
   return newSubmission;
 }

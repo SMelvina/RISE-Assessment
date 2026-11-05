@@ -3,6 +3,7 @@ import { ParticipantSubmission } from '../data/adminSubmissions';
 import { DIMENSIONS, PILLAR_PASTELS } from '../data/dimensions';
 import { PILLARS } from '../data/pillars';
 import { BrandLogo } from './BrandLogo';
+import { isSupabaseConfigured } from '../utils/supabase';
 import {
   Users,
   TrendingUp,
@@ -192,8 +193,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         {/* Title & Introduction */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-warm-300">
           <div>
-            <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-charcoal-muted font-mono mb-2">
+            <div className="inline-flex items-center gap-2.5 text-xs font-bold uppercase tracking-widest text-charcoal-muted font-mono mb-2">
               <span>Executive Telemetry & Diagnostic Cohort</span>
+              {isSupabaseConfigured() ? (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                  Live Cloud Sync (Supabase)
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300">
+                  Local Storage Mode
+                </span>
+              )}
             </div>
             <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium tracking-tight text-charcoal">
               Responses & Participant Overview

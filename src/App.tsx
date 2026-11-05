@@ -24,6 +24,7 @@ import {
   getInitialSubmissions,
   ParticipantSubmission,
 } from './data/adminSubmissions';
+import { fetchSubmissionsFromSupabase, isSupabaseConfigured } from './utils/supabase';
 
 // Benchmark sample response set for instant prototype results preview
 function getBenchmarkResponses(): Record<string, ScoreValue> {
@@ -160,6 +161,28 @@ export function App() {
   // Cohort submissions recorded for the Admin Dashboard
   const [submissions, setSubmissions] = useState<ParticipantSubmission[]>(() => loadAllSubmissions());
   const [adminPreviewActive, setAdminPreviewActive] = useState<boolean>(false);
+
+  // Sync live submissions from Supabase if cloud is connected
+  useEffect(() => {
+    if (isSupabaseConfigured()) {
+      fetchSubmissionsFromSupabase().then((cloudSubs) => {
+        if (cloudSubs && cloudSubs.length > 0) {
+          setSubmissions((prev) => {
+            const map = new Map<string, ParticipantSubmission>();
+            cloudSubs.forEach((s) => map.set(s.id, s));
+            prev.forEach((s) => {
+              if (!map.has(s.id)) map.set(s.id, s);
+            });
+            const merged = Array.from(map.values()).sort(
+              (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+            );
+            saveAllSubmissions(merged);
+            return merged;
+          });
+        }
+      });
+    }
+  }, [state.currentScreen]);
 
   // State for restart confirmation modal triggered by clicking the Brand Logo
   const [showHomeConfirmModal, setShowHomeConfirmModal] = useState(false);
