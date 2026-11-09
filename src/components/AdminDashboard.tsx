@@ -33,6 +33,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDimension, setSelectedDimension] = useState<string>('ALL');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefreshClick = async () => {
+    if (!onResetCohortData || isRefreshing) return;
+    setIsRefreshing(true);
+    try {
+      await Promise.resolve(onResetCohortData());
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 600);
+    }
+  };
 
   // Check if any mock demo seed profiles are in the cohort
   const hasDemoSubmissions = useMemo(
@@ -174,12 +185,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {!hasDemoSubmissions && onResetCohortData && (
             <button
               type="button"
-              onClick={onResetCohortData}
-              title="Refresh submissions"
-              className="inline-flex items-center gap-2 px-3 py-2.5 rounded-[16px] border border-warm-300 bg-warm-100 hover:bg-warm-200 text-charcoal text-xs font-semibold tracking-wide uppercase transition-colors cursor-pointer"
+              onClick={handleRefreshClick}
+              disabled={isRefreshing}
+              title="Refresh submissions from database"
+              className="inline-flex items-center gap-2 px-3 py-2.5 rounded-[16px] border border-warm-300 bg-warm-100 hover:bg-warm-200 text-charcoal text-xs font-semibold tracking-wide uppercase transition-colors cursor-pointer disabled:opacity-60"
             >
-              <RotateCcw className="w-4 h-4 text-charcoal-muted" />
-              <span>Refresh</span>
+              <RotateCcw className={`w-4 h-4 text-charcoal-muted ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
             </button>
           )}
 

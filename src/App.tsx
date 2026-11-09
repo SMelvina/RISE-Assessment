@@ -26,7 +26,7 @@ import {
   clearAllDemoSubmissions,
   ParticipantSubmission,
 } from './data/adminSubmissions';
-import { fetchSubmissionsFromSupabase, isSupabaseConfigured } from './utils/supabase';
+import { fetchSubmissionsFromSupabase, syncSubmissionToSupabase, isSupabaseConfigured } from './utils/supabase';
 
 // Benchmark sample response set for instant prototype results preview
 function getBenchmarkResponses(): Record<string, ScoreValue> {
@@ -183,12 +183,20 @@ export function App() {
   useEffect(() => {
     if (isSupabaseConfigured()) {
       fetchSubmissionsFromSupabase().then((cloudSubs) => {
-        // Exclude sample demo seed submissions and display only real submissions
-        const realSubs = (cloudSubs || []).filter(
+        const realCloud = (cloudSubs || []).filter(
           (s) => !s.id.match(/^sub-00[0-9]|^sub-01[0-2]/)
         );
-        setSubmissions(realSubs);
-        saveAllSubmissions(realSubs);
+        const localSubs = loadAllSubmissions().filter(
+          (s) => !s.id.match(/^sub-00[0-9]|^sub-01[0-2]/)
+        );
+        const mergedMap = new Map<string, ParticipantSubmission>();
+        localSubs.forEach((s) => mergedMap.set(s.id, s));
+        realCloud.forEach((s) => mergedMap.set(s.id, s));
+        const merged = Array.from(mergedMap.values()).sort(
+          (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+        );
+        setSubmissions(merged);
+        saveAllSubmissions(merged);
       });
     }
   }, [state.currentScreen]);
@@ -257,15 +265,28 @@ export function App() {
     }));
   }, []);
 
-  const handleResetCohortData = useCallback(() => {
+  const handleResetCohortData = useCallback(async () => {
     if (isSupabaseConfigured()) {
-      fetchSubmissionsFromSupabase().then((cloudSubs) => {
-        const realSubs = (cloudSubs || []).filter(
-          (s) => !s.id.match(/^sub-00[0-9]|^sub-01[0-2]/)
-        );
-        setSubmissions(realSubs);
-        saveAllSubmissions(realSubs);
-      });
+      // First retry syncing any existing local submissions that haven't reached cloud
+      const localSubs = loadAllSubmissions().filter(
+        (s) => !s.id.match(/^sub-00[0-9]|^sub-01[0-2]/)
+      );
+      for (const sub of localSubs) {
+        syncSubmissionToSupabase(sub).catch(() => {});
+      }
+
+      const cloudSubs = await fetchSubmissionsFromSupabase();
+      const realCloud = (cloudSubs || []).filter(
+        (s) => !s.id.match(/^sub-00[0-9]|^sub-01[0-2]/)
+      );
+      const mergedMap = new Map<string, ParticipantSubmission>();
+      localSubs.forEach((s) => mergedMap.set(s.id, s));
+      realCloud.forEach((s) => mergedMap.set(s.id, s));
+      const merged = Array.from(mergedMap.values()).sort(
+        (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+      );
+      setSubmissions(merged);
+      saveAllSubmissions(merged);
     } else {
       const fresh = getInitialSubmissions();
       saveAllSubmissions(fresh);
