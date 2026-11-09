@@ -56,13 +56,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const avgTotalScore = useMemo(() => {
     if (totalUsers === 0) return 0;
-    const sum = submissions.reduce((acc, curr) => acc + curr.totalScore, 0);
+    const sum = submissions.reduce((acc, curr) => acc + (curr.totalScore || 0), 0);
     return Math.round((sum / totalUsers) * 10) / 10;
   }, [submissions, totalUsers]);
 
   const avgOverallIndex = useMemo(() => {
     if (totalUsers === 0) return 0;
-    const sum = submissions.reduce((acc, curr) => acc + curr.overallIndex, 0);
+    const sum = submissions.reduce((acc, curr) => acc + (curr.overallIndex || 0), 0);
     return Math.round(sum / totalUsers);
   }, [submissions, totalUsers]);
 
@@ -70,10 +70,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const dimensionAverages = useMemo(() => {
     if (totalUsers === 0) return { R: 0, I: 0, S: 0, E: 0 };
     return {
-      R: Math.round(submissions.reduce((acc, s) => acc + s.dimensionPercentages.R, 0) / totalUsers),
-      I: Math.round(submissions.reduce((acc, s) => acc + s.dimensionPercentages.I, 0) / totalUsers),
-      S: Math.round(submissions.reduce((acc, s) => acc + s.dimensionPercentages.S, 0) / totalUsers),
-      E: Math.round(submissions.reduce((acc, s) => acc + s.dimensionPercentages.E, 0) / totalUsers),
+      R: Math.round(submissions.reduce((acc, s) => acc + (s.dimensionPercentages?.R || 0), 0) / totalUsers),
+      I: Math.round(submissions.reduce((acc, s) => acc + (s.dimensionPercentages?.I || 0), 0) / totalUsers),
+      S: Math.round(submissions.reduce((acc, s) => acc + (s.dimensionPercentages?.S || 0), 0) / totalUsers),
+      E: Math.round(submissions.reduce((acc, s) => acc + (s.dimensionPercentages?.E || 0), 0) / totalUsers),
     };
   }, [submissions, totalUsers]);
 
@@ -81,7 +81,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const stageDistribution = useMemo(() => {
     const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 };
     submissions.forEach((s) => {
-      counts[s.pinpointedStageNumber] = (counts[s.pinpointedStageNumber] || 0) + 1;
+      const stageNum = s.pinpointedStageNumber || 1;
+      counts[stageNum] = (counts[stageNum] || 0) + 1;
     });
     return counts;
   }, [submissions]);
@@ -104,7 +105,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // Filtered Submissions
   const filteredSubmissions = useMemo(() => {
     return submissions.filter((s) => {
-      const matchesSearch = s.participantName.toLowerCase().includes(searchTerm.toLowerCase());
+      const name = s.participantName || '';
+      const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesDim =
         selectedDimension === 'ALL' || s.pinpointedDimension === selectedDimension;
       return matchesSearch && matchesDim;
@@ -127,17 +129,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       'Expand (%)',
     ];
     const rows = submissions.map((s) => [
-      `"${s.participantName.replace(/"/g, '""')}"`,
-      new Date(s.completedAt).toLocaleDateString(),
-      s.totalScore,
-      s.overallIndex,
-      s.pinpointedStageNumber,
-      `"${s.pinpointedStageName}"`,
-      s.pinpointedDimension,
-      s.dimensionPercentages.R,
-      s.dimensionPercentages.I,
-      s.dimensionPercentages.S,
-      s.dimensionPercentages.E,
+      `"${(s.participantName || '').replace(/"/g, '""')}"`,
+      s.completedAt ? new Date(s.completedAt).toLocaleDateString() : '—',
+      s.totalScore || 0,
+      s.overallIndex || 0,
+      s.pinpointedStageNumber || 1,
+      `"${s.pinpointedStageName || ''}"`,
+      s.pinpointedDimension || 'R',
+      s.dimensionPercentages?.R || 0,
+      s.dimensionPercentages?.I || 0,
+      s.dimensionPercentages?.S || 0,
+      s.dimensionPercentages?.E || 0,
     ]);
     const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -510,12 +512,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   </tr>
                 ) : (
                   filteredSubmissions.map((sub) => {
-                    const pastel = PILLAR_PASTELS[sub.pinpointedStageNumber];
-                    const dateFormatted = new Date(sub.completedAt).toLocaleDateString(undefined, {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    });
+                    const stageNum = sub.pinpointedStageNumber || 1;
+                    const pastel = PILLAR_PASTELS[stageNum] || PILLAR_PASTELS[1];
+                    const dateFormatted = sub.completedAt
+                      ? new Date(sub.completedAt).toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })
+                      : '—';
+                    const name = sub.participantName || 'Anonymous Participant';
 
                     return (
                       <tr key={sub.id} className="hover:bg-warm-50/70 transition-colors group">
@@ -523,12 +529,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <td className="py-4 px-5 sm:px-6 font-semibold text-charcoal">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-warm-200 text-charcoal flex items-center justify-center font-bold text-xs flex-shrink-0">
-                              {sub.participantName.charAt(0).toUpperCase()}
+                              {name.charAt(0).toUpperCase()}
                             </div>
                             <div>
-                              <span className="block leading-tight">{sub.participantName}</span>
+                              <span className="block leading-tight">{name}</span>
                               <span className="text-[11px] font-normal text-charcoal-muted">
-                                {sub.status}
+                                {sub.status || 'Completed'}
                               </span>
                             </div>
                           </div>
@@ -542,11 +548,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         {/* Score & Index */}
                         <td className="py-4 px-4 whitespace-nowrap">
                           <span className="font-bold text-charcoal font-mono">
-                            {sub.totalScore}
+                            {sub.totalScore || 0}
                           </span>
                           <span className="text-xs text-charcoal-muted font-mono"> / 315</span>
                           <span className="ml-2 inline-block text-xs font-bold px-2 py-0.5 rounded-[8px] bg-warm-200 text-charcoal">
-                            {sub.overallIndex}%
+                            {sub.overallIndex || 0}%
                           </span>
                         </td>
 
@@ -560,21 +566,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                               color: pastel.text,
                             }}
                           >
-                            <span>Stage 0{sub.pinpointedStageNumber}:</span>
-                            <span>{sub.pinpointedStageName}</span>
+                            <span>Stage 0{stageNum}:</span>
+                            <span>{sub.pinpointedStageName || pastel.name}</span>
                           </span>
                         </td>
 
                         {/* Dimension Mini Breakdown */}
                         <td className="py-4 px-4 whitespace-nowrap text-xs font-mono text-charcoal-muted">
                           <div className="flex items-center gap-2">
-                            <span title="Realize">R: {sub.dimensionPercentages.R}%</span>
+                            <span title="Realize">R: {sub.dimensionPercentages?.R ?? 0}%</span>
                             <span className="text-warm-300">·</span>
-                            <span title="Illuminate">I: {sub.dimensionPercentages.I}%</span>
+                            <span title="Illuminate">I: {sub.dimensionPercentages?.I ?? 0}%</span>
                             <span className="text-warm-300">·</span>
-                            <span title="Start">S: {sub.dimensionPercentages.S}%</span>
+                            <span title="Start">S: {sub.dimensionPercentages?.S ?? 0}%</span>
                             <span className="text-warm-300">·</span>
-                            <span title="Expand">E: {sub.dimensionPercentages.E}%</span>
+                            <span title="Expand">E: {sub.dimensionPercentages?.E ?? 0}%</span>
                           </div>
                         </td>
 

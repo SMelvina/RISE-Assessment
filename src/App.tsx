@@ -184,10 +184,10 @@ export function App() {
     if (isSupabaseConfigured()) {
       fetchSubmissionsFromSupabase().then((cloudSubs) => {
         const realCloud = (cloudSubs || []).filter(
-          (s) => !s.id.match(/^sub-00[0-9]|^sub-01[0-2]/)
+          (s) => !s.id.startsWith('test-') && !s.id.match(/^sub-00[0-9]|^sub-01[0-2]/)
         );
         const localSubs = loadAllSubmissions().filter(
-          (s) => !s.id.match(/^sub-00[0-9]|^sub-01[0-2]/)
+          (s) => !s.id.startsWith('test-') && !s.id.match(/^sub-00[0-9]|^sub-01[0-2]/)
         );
         const mergedMap = new Map<string, ParticipantSubmission>();
         localSubs.forEach((s) => mergedMap.set(s.id, s));
@@ -269,7 +269,7 @@ export function App() {
     if (isSupabaseConfigured()) {
       // First retry syncing any existing local submissions that haven't reached cloud
       const localSubs = loadAllSubmissions().filter(
-        (s) => !s.id.match(/^sub-00[0-9]|^sub-01[0-2]/)
+        (s) => !s.id.startsWith('test-') && !s.id.match(/^sub-00[0-9]|^sub-01[0-2]/)
       );
       for (const sub of localSubs) {
         syncSubmissionToSupabase(sub).catch(() => {});
@@ -277,7 +277,7 @@ export function App() {
 
       const cloudSubs = await fetchSubmissionsFromSupabase();
       const realCloud = (cloudSubs || []).filter(
-        (s) => !s.id.match(/^sub-00[0-9]|^sub-01[0-2]/)
+        (s) => !s.id.startsWith('test-') && !s.id.match(/^sub-00[0-9]|^sub-01[0-2]/)
       );
       const mergedMap = new Map<string, ParticipantSubmission>();
       localSubs.forEach((s) => mergedMap.set(s.id, s));
