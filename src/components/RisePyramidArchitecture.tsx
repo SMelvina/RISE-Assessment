@@ -32,15 +32,15 @@ export const RisePyramidArchitecture: React.FC<RisePyramidArchitectureProps> = (
     {
       dimensionId: 'E' as const,
       label: 'E - EXPAND',
-      boxBg: 'bg-[#522547]', // Brighter rich royal mulberry plum
-      accentColor: '#F3DCF0', // Bright crisp lilac
+      boxBg: 'bg-[#C8644E]', // Luminous warm peach
+      accentColor: '#FFF2EB', // Bright crisp cream-peach
       pillars: [PILLARS[8], PILLARS[7]], // 9 Lead, 8 Scale
     },
     {
       dimensionId: 'S' as const,
       label: 'S - START',
-      boxBg: 'bg-[#6E320A]', // Brighter warm roasted amber-ochre
-      accentColor: '#FEE5D5', // Bright crisp peach
+      boxBg: 'bg-[#B85317]', // Deep warm terracotta amber
+      accentColor: '#FFF2EB', // Bright crisp pastel orange
       pillars: [PILLARS[6], PILLARS[5]], // 7 Build, 6 Launch
     },
     {

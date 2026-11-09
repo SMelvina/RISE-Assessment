@@ -58,7 +58,7 @@ export const PillarTransitionScreen: React.FC<PillarTransitionScreenProps> = ({
           </div>
 
           <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl font-medium tracking-tight leading-[1.15] text-white">
-            Well done, {participantName}.
+            Well done, <span className="italic text-yellow-300 font-normal">{participantName}</span>.
           </h1>
 
           <p className="font-serif text-2xl sm:text-3xl italic font-normal text-white/95">

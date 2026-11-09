@@ -26,13 +26,26 @@ const POSTER_THEMES: Record<number, PillarPosterTheme> = {
   4: { bgStart: '#573F05', bgEnd: '#785808', letterColor: '#2B1E02', letterOpacity: 0.38, glowColor: '#EED468' }, // Articulate
   5: { bgStart: '#5E4406', bgEnd: '#805D09', letterColor: '#2F2103', letterOpacity: 0.38, glowColor: '#F7E082' }, // Architect
 
-  // Dimension S (Start - Vibrant terracotta / burnt orange)
-  6: { bgStart: '#6B2706', bgEnd: '#913809', letterColor: '#361203', letterOpacity: 0.36, glowColor: '#E6976F' }, // Launch
-  7: { bgStart: '#732C06', bgEnd: '#9B3E0A', letterColor: '#3B1503', letterOpacity: 0.36, glowColor: '#F2AC87' }, // Build
+  // Dimension S (Start - Vibrant bright orange)
+  6: { bgStart: '#C44304', bgEnd: '#E65100', letterColor: '#2B0E02', letterOpacity: 0.36, glowColor: '#FF8A4C' }, // Launch
+  7: { bgStart: '#CC4A07', bgEnd: '#EF6C00', letterColor: '#2B0E02', letterOpacity: 0.36, glowColor: '#FFA66E' }, // Build
 
-  // Dimension E (Expand - Deep royal plum & mauve)
-  8: { bgStart: '#481B3E', bgEnd: '#6B2B5D', letterColor: '#250D20', letterOpacity: 0.36, glowColor: '#BD89B1' }, // Scale
-  9: { bgStart: '#401636', bgEnd: '#612453', letterColor: '#210B1C', letterOpacity: 0.36, glowColor: '#CF9DC4' }, // Lead
+  // Dimension E (Expand - Warm luminous peach)
+  8: { bgStart: '#5C261B', bgEnd: '#7A3324', letterColor: '#2B0E02', letterOpacity: 0.36, glowColor: '#F6A890' }, // Scale
+  9: { bgStart: '#4E1F16', bgEnd: '#6B2B1E', letterColor: '#2B0E02', letterOpacity: 0.36, glowColor: '#F6A890' }, // Lead
+};
+
+// Available photography assets for pillars
+const PILLAR_IMAGES: Record<string, string> = {
+  build: '/pillars/build.png',
+  // identity: '/pillars/identity.png',
+  // clarify: '/pillars/clarify.png',
+  // crystallize: '/pillars/crystallize.png',
+  // articulate: '/pillars/articulate.png',
+  // architect: '/pillars/architect.png',
+  // launch: '/pillars/launch.png',
+  // scale: '/pillars/scale.png',
+  // lead: '/pillars/lead.png',
 };
 
 export const ArtisticLevelGraphic: React.FC<ArtisticLevelGraphicProps> = ({
@@ -41,6 +54,32 @@ export const ArtisticLevelGraphic: React.FC<ArtisticLevelGraphicProps> = ({
   textColor = '#FFFFFF',
 }) => {
   const theme = POSTER_THEMES[pillar.number] || POSTER_THEMES[1];
+  const customImage = PILLAR_IMAGES[pillar.id];
+
+  if (customImage) {
+    return (
+      <div
+        className={`relative w-full max-w-[360px] sm:max-w-[420px] lg:max-w-[440px] aspect-square flex items-center justify-center select-none ${className}`}
+      >
+        {/* Ambient background glow matching pillar theme & brand gold */}
+        <div
+          className="absolute inset-0 rounded-[32px] blur-3xl opacity-35 pointer-events-none transform scale-95"
+          style={{
+            background: `radial-gradient(circle, #E39F00 0%, ${theme.glowColor} 60%, transparent 100%)`,
+          }}
+        />
+
+        <div className="relative z-10 w-full h-full overflow-hidden rounded-[24px] sm:rounded-[28px] shadow-2xl border border-white/20 bg-charcoal">
+          <img
+            src={customImage}
+            alt={`Stage 0${pillar.number} · ${pillar.name}`}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      </div>
+    );
+  }
+
   const nameUpper = pillar.name.toUpperCase();
   const letters = nameUpper.split('');
   const numLetters = letters.length;

@@ -31,27 +31,27 @@ export const DIMENSIONS: Record<DimensionId, DimensionInfo> = {
     id: 'S',
     name: 'Start',
     theme: 'Initiating and developing the undertaking.',
-    colorName: 'Phoszade Amber-Ochre',
-    tailwindBorder: 'border-[#873806]',
-    tailwindBgLight: 'bg-[#FBF3E8]',
-    tailwindText: 'text-[#873806]',
-    tailwindBadge: 'bg-[#FBF3E8] text-[#873806] border-[#E8CDB5]',
-    tailwindAccent: 'bg-[#873806]',
-    hex: '#873806',
-    lightHex: '#FBF3E8',
+    colorName: 'Pastel Orange',
+    tailwindBorder: 'border-[#D45711]',
+    tailwindBgLight: 'bg-[#FFF7F2]',
+    tailwindText: 'text-[#D45711]',
+    tailwindBadge: 'bg-[#FFF7F2] text-[#D45711] border-[#FFDCC6]',
+    tailwindAccent: 'bg-[#D45711]',
+    hex: '#D45711',
+    lightHex: '#FFF7F2',
   },
   E: {
     id: 'E',
     name: 'Expand',
     theme: 'Multiplying results and establishing lasting impact.',
-    colorName: 'Regal Mulberry',
-    tailwindBorder: 'border-[#4A2840]',
-    tailwindBgLight: 'bg-[#F6EDF3]',
-    tailwindText: 'text-[#4A2840]',
-    tailwindBadge: 'bg-[#F6EDF3] text-[#4A2840] border-[#DAC3D3]',
-    tailwindAccent: 'bg-[#4A2840]',
-    hex: '#4A2840',
-    lightHex: '#F6EDF3',
+    colorName: 'Warm Peach',
+    tailwindBorder: 'border-[#8C3A2B]',
+    tailwindBgLight: 'bg-[#FDF2EE]',
+    tailwindText: 'text-[#8C3A2B]',
+    tailwindBadge: 'bg-[#FDF2EE] text-[#8C3A2B] border-[#F5C7B8]',
+    tailwindAccent: 'bg-[#8C3A2B]',
+    hex: '#8C3A2B',
+    lightHex: '#FDF2EE',
   },
 };
 
@@ -82,14 +82,14 @@ export const PILLAR_PASTELS: Record<number, PillarPastelTheme> = {
   3: { bg: '#94D7B5', text: '#051D11', contrastColor: '#095E32', introBg: '#095E32', name: 'Crystallize', dimensionId: 'R' },
 
   // Dimension I (Illuminate - Sunlit to Buttercup Pastel Yellows)
-  4: { bg: '#EED468', text: '#2E1E00', contrastColor: '#724F00', introBg: '#5A4508', name: 'Articulate', dimensionId: 'I' },
-  5: { bg: '#F7E082', text: '#2E1E00', contrastColor: '#6E4C00', introBg: '#684E06', name: 'Architect', dimensionId: 'I' },
+  4: { bg: '#EED468', text: '#2E1E00', contrastColor: '#724F00', introBg: '#EED468', name: 'Articulate', dimensionId: 'I' },
+  5: { bg: '#F7E082', text: '#2E1E00', contrastColor: '#6E4C00', introBg: '#F7E082', name: 'Architect', dimensionId: 'I' },
 
-  // Dimension S (Start - Terracotta to Peach Pastels)
-  6: { bg: '#E6976F', text: '#2B0E02', contrastColor: '#8C3B07', introBg: '#6E320A', name: 'Launch', dimensionId: 'S' },
-  7: { bg: '#F2AC87', text: '#2B0E02', contrastColor: '#8C3B07', introBg: '#7C3707', name: 'Build', dimensionId: 'S' },
+  // Dimension S (Start - Soft Luminous Pastel Orange)
+  6: { bg: '#F8B179', text: '#2B0E02', contrastColor: '#A03E06', introBg: '#F8B179', name: 'Launch', dimensionId: 'S' },
+  7: { bg: '#F8B179', text: '#2B0E02', contrastColor: '#A03E06', introBg: '#F8B179', name: 'Build', dimensionId: 'S' },
 
-  // Dimension E (Expand - Mauve to Lilac Pastels)
-  8: { bg: '#BD89B1', text: '#140410', contrastColor: '#542247', introBg: '#522547', name: 'Scale', dimensionId: 'E' },
-  9: { bg: '#CF9DC4', text: '#1E0719', contrastColor: '#5C244E', introBg: '#451E3B', name: 'Lead', dimensionId: 'E' },
+  // Dimension E (Expand - Warm Luminous Peach)
+  8: { bg: '#F6A890', text: '#2B0E02', contrastColor: '#8C3A2B', introBg: '#F6A890', name: 'Scale', dimensionId: 'E' },
+  9: { bg: '#F6A890', text: '#2B0E02', contrastColor: '#8C3A2B', introBg: '#F6A890', name: 'Lead', dimensionId: 'E' },
 };

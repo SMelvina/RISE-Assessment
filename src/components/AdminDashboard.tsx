@@ -3,7 +3,6 @@ import { ParticipantSubmission } from '../data/adminSubmissions';
 import { DIMENSIONS, PILLAR_PASTELS } from '../data/dimensions';
 import { PILLARS } from '../data/pillars';
 import { BrandLogo } from './BrandLogo';
-import { isSupabaseConfigured } from '../utils/supabase';
 import {
   Users,
   TrendingUp,
@@ -176,7 +175,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <button
               type="button"
               onClick={onResetCohortData}
-              title="Refresh live cloud submissions from Supabase"
+              title="Refresh submissions"
               className="inline-flex items-center gap-2 px-3 py-2.5 rounded-[16px] border border-warm-300 bg-warm-100 hover:bg-warm-200 text-charcoal text-xs font-semibold tracking-wide uppercase transition-colors cursor-pointer"
             >
               <RotateCcw className="w-4 h-4 text-charcoal-muted" />
@@ -200,18 +199,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         {/* Title & Introduction */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-warm-300">
           <div>
-            <div className="inline-flex items-center gap-2.5 text-xs font-bold uppercase tracking-widest text-charcoal-muted font-mono mb-2">
-              <span>Executive Telemetry & Diagnostic Cohort</span>
-              {isSupabaseConfigured() ? (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                  Live Cloud Sync (Supabase)
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300">
-                  Local Storage Mode
-                </span>
-              )}
+            <div className="text-xs font-bold uppercase tracking-widest text-charcoal-muted font-mono mb-2">
+              Executive Telemetry & Diagnostic Cohort
             </div>
             <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium tracking-tight text-charcoal">
               Responses & Participant Overview
@@ -271,7 +260,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <span className="text-xs uppercase font-bold tracking-wider font-mono">
                 Primary Bottleneck Stage
               </span>
-              <div className="w-9 h-9 rounded-[12px] bg-warm-100 flex items-center justify-center text-[#873806]">
+              <div className="w-9 h-9 rounded-[12px] bg-warm-100 flex items-center justify-center text-[#D45711]">
                 <Layers className="w-5 h-5" />
               </div>
             </div>
@@ -293,7 +282,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <span className="text-xs uppercase font-bold tracking-wider font-mono">
                 Completion Rate
               </span>
-              <div className="w-9 h-9 rounded-[12px] bg-warm-100 flex items-center justify-center text-[#4A2840]">
+              <div className="w-9 h-9 rounded-[12px] bg-warm-100 flex items-center justify-center text-[#8C3A2B]">
                 <Activity className="w-5 h-5" />
               </div>
             </div>

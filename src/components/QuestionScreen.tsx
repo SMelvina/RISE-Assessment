@@ -26,6 +26,13 @@ const SCALE_OPTIONS: { value: ScoreValue; label: string; subtext: string }[] = [
   { value: 5, label: 'Completely true of me', subtext: 'Mature, consistent and proven practice' },
 ];
 
+const DIMENSION_LEVEL_NUMBERS: Record<string, number> = {
+  R: 1,
+  I: 2,
+  S: 3,
+  E: 4,
+};
+
 export const QuestionScreen: React.FC<QuestionScreenProps> = ({
   question,
   pillar,
@@ -61,7 +68,7 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
     };
   }, [question.id, clearAutoAdvanceTimer]);
 
-  // Handler for selecting a score (with 0.50s / 500ms auto-advance)
+  // Handler for selecting a score (with 1.2s / 1200ms auto-advance)
   const handleScoreClick = useCallback(
     (score: ScoreValue) => {
       onSelectScore(score);
@@ -69,7 +76,7 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
       clearAutoAdvanceTimer();
       timerRef.current = setTimeout(() => {
         onContinue();
-      }, 500); // 0.50s auto-advance delay after option selection
+      }, 1200); // 1.2s auto-advance delay after option selection
     },
     [onSelectScore, onContinue, clearAutoAdvanceTimer]
   );
@@ -124,20 +131,25 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
         <div key={question.id} className="max-w-2xl mx-auto w-full animate-screen-in">
           {/* Clear Accessibility & Hierarchical Level Heading */}
           <div className="text-center mb-2.5 sm:mb-4 flex flex-col items-center">
-            {/* Stage Eyebrow Pill displaying the stage pastel color with >10:1 AAA contrast */}
+            {/* Stage Eyebrow Pill - Matches the button colour */}
             <div
-              className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-widest font-mono mb-1.5 shadow-xs border border-black/10"
+              className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest font-mono mb-2 shadow-xs border transition-colors"
               style={{
                 backgroundColor: pastel.bg,
                 color: pastel.text,
+                borderColor: pastel.contrastColor,
               }}
             >
-              <span>Stage 0{pillar.number}</span>
-              <span className="opacity-40">·</span>
-              <span>{dim.name}</span>
+              <span
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ backgroundColor: pastel.contrastColor }}
+              />
+              <span>
+                {dim.name.toUpperCase()} - LEVEL {DIMENSION_LEVEL_NUMBERS[pillar.dimension]}
+              </span>
             </div>
 
-            {/* Authoritative Level Heading in verified WCAG AAA (>= 7.0:1) contrast hue */}
+            {/* Authoritative Level Heading in the signature section colour */}
             <h1
               className="font-sans text-2xl sm:text-3xl md:text-4xl font-black tracking-widest uppercase drop-shadow-xs mb-1"
               style={{ color: pastel.contrastColor || dim.hex }}
@@ -199,41 +211,50 @@ export const QuestionScreen: React.FC<QuestionScreenProps> = ({
               <span className="text-right leading-tight">Completely true of me</span>
             </div>
           </div>
+
+          {/* Action Navigation - Positioned with snug, balanced spacing directly under response options */}
+          <nav
+            aria-label="Assessment Navigation"
+            className="max-w-xl mx-auto w-full mt-6 sm:mt-8 pt-4 sm:pt-5 border-t border-warm-300 flex items-center justify-between gap-4"
+          >
+            <button
+              type="button"
+              onClick={handleManualBack}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] border border-warm-300 bg-white hover:bg-warm-200 text-charcoal hover:text-black text-xs sm:text-sm font-medium transition-colors group cursor-pointer shadow-xs"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
+              <span>Previous</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleManualContinue}
+              disabled={currentScore === undefined}
+              className={`inline-flex items-center gap-2 px-6 sm:px-7 py-2.5 rounded-[14px] text-xs sm:text-sm font-semibold transition-all shadow-sm group cursor-pointer border ${
+                currentScore === undefined
+                  ? 'bg-warm-300 text-charcoal-muted cursor-not-allowed opacity-60 border-warm-300'
+                  : 'hover:opacity-95'
+              }`}
+              style={{
+                backgroundColor: currentScore !== undefined ? pastel.bg : undefined,
+                borderColor: currentScore !== undefined ? pastel.contrastColor : undefined,
+                color: currentScore !== undefined ? pastel.text : undefined,
+              }}
+            >
+              <span>{overallQuestionNumber === totalQuestionsOverall ? 'Complete Assessment' : 'Continue'}</span>
+              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+            </button>
+          </nav>
         </div>
       </main>
 
-      {/* Bottom Navigation Bar positioned safely above the fold */}
-      <nav aria-label="Assessment Navigation" className="border-t border-warm-300 bg-warm-100/90 px-4 py-2.5 sm:py-3 md:px-14 lg:px-20 w-full">
-        <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
-          <button
-            type="button"
-            onClick={handleManualBack}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[14px] border border-warm-300 bg-white hover:bg-warm-200 text-charcoal hover:text-black text-xs sm:text-sm font-medium transition-colors group cursor-pointer shadow-xs"
-          >
-            <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
-            <span>Previous</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={handleManualContinue}
-            disabled={currentScore === undefined}
-            className={`inline-flex items-center gap-2 px-6 sm:px-7 py-2.5 rounded-[14px] text-xs sm:text-sm font-semibold transition-all shadow-sm group cursor-pointer border ${
-              currentScore === undefined
-                ? 'bg-warm-300 text-charcoal-muted cursor-not-allowed opacity-60 border-warm-300'
-                : 'hover:opacity-95'
-            }`}
-            style={{
-              backgroundColor: currentScore !== undefined ? pastel.bg : undefined,
-              borderColor: currentScore !== undefined ? pastel.contrastColor : undefined,
-              color: currentScore !== undefined ? pastel.text : undefined,
-            }}
-          >
-            <span>{overallQuestionNumber === totalQuestionsOverall ? 'Complete Assessment' : 'Continue'}</span>
-            <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
-          </button>
-        </div>
-      </nav>
+      {/* Footer matching standard platform page layout */}
+      <footer className="w-full px-5 py-3 sm:px-8 md:px-14 lg:px-20 border-t border-warm-300 flex items-center justify-between text-xs text-charcoal-muted">
+        <span>Phoszade &copy; {new Date().getFullYear()} · THE RISE Framework</span>
+        <span className="font-mono text-[11px] text-charcoal-muted">
+          Question {overallQuestionNumber} of {totalQuestionsOverall}
+        </span>
+      </footer>
     </div>
   );
 };

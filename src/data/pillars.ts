@@ -106,7 +106,7 @@ export const PILLARS: Pillar[] = [
     imageUrl:
       'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=2000&q=85',
     imageAlt: 'Active initiator stepping into real-world operational activation in warm amber light',
-    gradientTint: 'from-[#2A1108]/95 via-[#4A1D0D]/85 to-[#7A3219]/50',
+    gradientTint: 'from-[#2A0E03]/95 via-[#541D05]/85 to-[#C44304]/50',
     badgeLabel: 'REAL-WORLD ACTIVATION & COMMENCEMENT',
   },
   {
@@ -124,7 +124,7 @@ export const PILLARS: Pillar[] = [
     imageUrl:
       'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=2000&q=85',
     imageAlt: 'Collaborators engineering repeatable workflows and operational consistency',
-    gradientTint: 'from-[#2A1108]/95 via-[#4A1D0D]/85 to-[#7A3219]/50',
+    gradientTint: 'from-[#2A0E03]/95 via-[#541D05]/85 to-[#C44304]/50',
     badgeLabel: 'CAPACITY, SYSTEMS & CONSISTENCY',
   },
   {
@@ -141,8 +141,8 @@ export const PILLARS: Pillar[] = [
       'You have evaluated your capacity for multiplier growth. Finally, we look at leadership that builds beyond yourself.',
     imageUrl:
       'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=85',
-    imageAlt: 'Modern architectural tower reaching into expansive twilight plum sky',
-    gradientTint: 'from-[#1F0C1B]/95 via-[#34152D]/85 to-[#522346]/50',
+    imageAlt: 'Modern architectural tower reaching into expansive twilight peach sky',
+    gradientTint: 'from-[#240E0A]/95 via-[#3B1710]/85 to-[#5C261B]/50',
     badgeLabel: 'MULTIPLIER IMPACT & REACH',
   },
   {
@@ -159,8 +159,8 @@ export const PILLARS: Pillar[] = [
       'You have completed all 63 diagnostic questions across the 9 pillars of RISE. Your Vision Capacity Diagnosis profile is now ready to be generated.',
     imageUrl:
       'https://images.unsplash.com/photo-1531497865144-0464ef8fb9a9?auto=format&fit=crop&w=2000&q=85',
-    imageAlt: 'Generative mentor guiding rising leaders in dusk violet atmosphere',
-    gradientTint: 'from-[#1F0C1B]/95 via-[#34152D]/85 to-[#522346]/50',
+    imageAlt: 'Generative mentor guiding rising leaders in dusk peach atmosphere',
+    gradientTint: 'from-[#240E0A]/95 via-[#3B1710]/85 to-[#5C261B]/50',
     badgeLabel: 'ENDURING LEADERSHIP & LEGACY',
   },
 ];
