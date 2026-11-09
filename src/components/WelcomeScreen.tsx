@@ -93,7 +93,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 
         {/* Right Column: Grand RISE Stepped Pyramid Architecture Showcase */}
         <div className="lg:col-span-7 xl:col-span-7">
-          <div className="relative bg-[#011C0E]/85 border border-white/20 backdrop-blur-xl rounded-[12px] p-4 sm:p-6 md:p-8 shadow-2xl overflow-hidden">
+          <div className="relative bg-[#011C0E]/85 border border-white/20 backdrop-blur-xl rounded-[12px] p-2 sm:p-6 md:p-8 shadow-2xl overflow-hidden">
             {/* Ambient inner glow */}
             <div
               className="absolute -top-24 -right-24 w-64 h-64 rounded-full blur-3xl opacity-20 pointer-events-none"

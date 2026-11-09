@@ -12,17 +12,17 @@ export const RisePyramidArchitecture: React.FC<RisePyramidArchitectureProps> = (
   onSelectPillar,
   className = '',
 }) => {
-  // Stepped pyramid width progression (Foundation: 100% -> Summit: ~38%)
+  // Stepped pyramid width progression (Foundation: 100% -> Summit: ~38% on desktop, ~68% on mobile)
   const TIER_WIDTHS: Record<number, string> = {
     1: 'w-full', // Foundation: widest
-    2: 'w-[94%] sm:w-[92%]',
-    3: 'w-[88%] sm:w-[84%]',
-    4: 'w-[82%] sm:w-[76%]',
-    5: 'w-[76%] sm:w-[68%]',
-    6: 'w-[70%] sm:w-[60%]',
-    7: 'w-[64%] sm:w-[52%]',
-    8: 'w-[58%] sm:w-[44%]',
-    9: 'w-[52%] sm:w-[38%]', // Summit: narrowest
+    2: 'w-[96%] sm:w-[92%]',
+    3: 'w-[92%] sm:w-[84%]',
+    4: 'w-[88%] sm:w-[76%]',
+    5: 'w-[84%] sm:w-[68%]',
+    6: 'w-[80%] sm:w-[60%]',
+    7: 'w-[76%] sm:w-[52%]',
+    8: 'w-[72%] sm:w-[44%]',
+    9: 'w-[68%] sm:w-[38%]', // Summit: narrowest
   };
 
   // 4 Dimension Section Boxes (E -> S -> I -> R)
@@ -77,10 +77,10 @@ export const RisePyramidArchitecture: React.FC<RisePyramidArchitectureProps> = (
               key={box.dimensionId}
               className={`flex items-center w-full transition-all duration-300 ${box.boxBg} ${verticalPadding}`}
             >
-              {/* Left Dimension Section Label: Bold, clean, vertically centered with ~24px extra breathing room from the left edge */}
-              <div className="w-24 sm:w-32 md:w-36 lg:w-40 flex-shrink-0 pl-8 sm:pl-9 md:pl-10 py-2 flex items-center">
+              {/* Left Dimension Section Label: Bold, clean, vertically centered */}
+              <div className="w-16 sm:w-32 md:w-36 lg:w-40 flex-shrink-0 pl-2.5 sm:pl-9 md:pl-10 py-2 flex items-center">
                 <span
-                  className="text-[9px] sm:text-[11px] md:text-xs font-sans font-black tracking-wider uppercase drop-shadow-xs leading-tight"
+                  className="text-[8px] sm:text-[11px] md:text-xs font-sans font-black tracking-wider uppercase drop-shadow-xs leading-tight"
                   style={{ color: box.accentColor }}
                 >
                   {box.label}
@@ -107,7 +107,7 @@ export const RisePyramidArchitecture: React.FC<RisePyramidArchitectureProps> = (
                       key={pillar.id}
                       type="button"
                       onClick={() => onSelectPillar?.(pillar)}
-                      className={`relative h-10 sm:h-11 md:h-12 ${widthClass} ${cornerRadius} transition-all duration-200 flex items-center justify-center px-2.5 sm:px-4 cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/40 group border-t border-black/10 first:border-t-0 shadow-xs hover:brightness-105 hover:scale-[1.01] z-10`}
+                      className={`relative h-10 sm:h-11 md:h-12 ${widthClass} ${cornerRadius} transition-all duration-200 flex items-center justify-center px-1 sm:px-4 cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/40 group border-t border-black/10 first:border-t-0 shadow-xs hover:brightness-105 hover:scale-[1.01] z-10`}
                       style={{
                         backgroundColor: pastel.bg,
                         boxShadow: `inset 0 1px 0 rgba(255,255,255,0.35)`,
@@ -115,13 +115,13 @@ export const RisePyramidArchitecture: React.FC<RisePyramidArchitectureProps> = (
                       aria-label={`Stage ${pillar.number}: ${pillar.name} — ${pillar.governingQuestion}`}
                     >
                       {/* Left: Distinctive White Number Circle */}
-                      <div className="absolute left-2 sm:left-3 w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full bg-white/95 flex items-center justify-center text-[#191817] font-extrabold text-[10px] sm:text-xs md:text-sm shadow-sm flex-shrink-0 transition-transform group-hover:scale-110">
+                      <div className="absolute left-1.5 sm:left-3 w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full bg-white/95 flex items-center justify-center text-[#191817] font-extrabold text-[10px] sm:text-xs md:text-sm shadow-sm flex-shrink-0 transition-transform group-hover:scale-110">
                         {pillar.number}
                       </div>
 
-                      {/* Center: Bold Pillar Name */}
+                      {/* Center: Bold Pillar Name (No truncation on mobile) */}
                       <span
-                        className="font-sans font-bold text-xs sm:text-sm md:text-base tracking-tight truncate px-7 sm:px-9"
+                        className="font-sans font-bold text-[11px] sm:text-sm md:text-base tracking-tight whitespace-nowrap pl-6 pr-1.5 sm:px-9"
                         style={{ color: pastel.text }}
                       >
                         {pillar.name}
@@ -133,7 +133,7 @@ export const RisePyramidArchitecture: React.FC<RisePyramidArchitectureProps> = (
 
               {/* Right Symmetrical Balance Spacer to guarantee exact equal left & right spacing */}
               <div
-                className="w-24 sm:w-32 md:w-36 lg:w-40 flex-shrink-0 pr-8 sm:pr-9 md:pr-10 py-2 pointer-events-none"
+                className="w-16 sm:w-32 md:w-36 lg:w-40 flex-shrink-0 pr-2.5 sm:pr-9 md:pr-10 py-2 pointer-events-none"
                 aria-hidden="true"
               />
             </div>
