@@ -94,20 +94,12 @@ export const RisePyramidArchitecture: React.FC<RisePyramidArchitectureProps> = (
                   const pastel = PILLAR_PASTELS[pillar.number] || { bg: dim.hex, text: '#0A2617' };
                   const widthClass = TIER_WIDTHS[pillar.number] || 'w-full';
 
-                  // Only Step 9 has rounded-t, only Step 1 has rounded-b; all inner steps sit flush with square joints
-                  const cornerRadius =
-                    pillar.number === 9
-                      ? 'rounded-t-lg'
-                      : pillar.number === 1
-                      ? 'rounded-b-lg'
-                      : 'rounded-none';
-
                   return (
                     <button
                       key={pillar.id}
                       type="button"
                       onClick={() => onSelectPillar?.(pillar)}
-                      className={`relative h-10 sm:h-11 md:h-12 ${widthClass} ${cornerRadius} transition-all duration-200 flex items-center justify-center px-1 sm:px-4 cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/40 group border-t border-black/10 first:border-t-0 shadow-xs hover:brightness-105 hover:scale-[1.01] z-10`}
+                      className={`relative h-10 sm:h-11 md:h-12 ${widthClass} rounded-none transition-all duration-200 flex items-center justify-center px-1 sm:px-4 cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/40 group border-t border-black/10 first:border-t-0 shadow-xs hover:brightness-105 hover:scale-[1.01] z-10`}
                       style={{
                         backgroundColor: pastel.bg,
                         boxShadow: `inset 0 1px 0 rgba(255,255,255,0.35)`,
