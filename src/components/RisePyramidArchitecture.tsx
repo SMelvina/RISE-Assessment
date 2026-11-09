@@ -12,17 +12,17 @@ export const RisePyramidArchitecture: React.FC<RisePyramidArchitectureProps> = (
   onSelectPillar,
   className = '',
 }) => {
-  // Stepped pyramid width progression (Foundation: 100% -> Summit: ~38% on desktop, ~68% on mobile)
+  // Stepped pyramid width progression (Foundation: 100% -> Summit: 60%)
   const TIER_WIDTHS: Record<number, string> = {
     1: 'w-full', // Foundation: widest
-    2: 'w-[96%] sm:w-[92%]',
-    3: 'w-[92%] sm:w-[84%]',
-    4: 'w-[88%] sm:w-[76%]',
-    5: 'w-[84%] sm:w-[68%]',
-    6: 'w-[80%] sm:w-[60%]',
-    7: 'w-[76%] sm:w-[52%]',
-    8: 'w-[72%] sm:w-[44%]',
-    9: 'w-[68%] sm:w-[38%]', // Summit: narrowest
+    2: 'w-[95%]',
+    3: 'w-[90%]',
+    4: 'w-[85%]',
+    5: 'w-[80%]',
+    6: 'w-[75%]',
+    7: 'w-[70%]',
+    8: 'w-[65%]',
+    9: 'w-[60%]', // Summit: comfortable 60% width
   };
 
   // 4 Dimension Section Boxes (E -> S -> I -> R)
@@ -77,10 +77,10 @@ export const RisePyramidArchitecture: React.FC<RisePyramidArchitectureProps> = (
               key={box.dimensionId}
               className={`flex items-center w-full transition-all duration-300 ${box.boxBg} ${verticalPadding}`}
             >
-              {/* Left Dimension Section Label: Bold, clean, vertically centered */}
-              <div className="w-16 sm:w-32 md:w-36 lg:w-40 flex-shrink-0 pl-2.5 sm:pl-9 md:pl-10 py-2 flex items-center">
+              {/* Left Dimension Section Label: Compact, clean, vertically centered */}
+              <div className="w-14 sm:w-24 md:w-28 lg:w-32 flex-shrink-0 pl-2 sm:pl-4 md:pl-5 py-2 flex items-center">
                 <span
-                  className="text-[8px] sm:text-[11px] md:text-xs font-sans font-black tracking-wider uppercase drop-shadow-xs leading-tight"
+                  className="text-[8px] sm:text-[10px] md:text-xs font-sans font-black tracking-wider uppercase drop-shadow-xs leading-tight"
                   style={{ color: box.accentColor }}
                 >
                   {box.label}
@@ -107,13 +107,13 @@ export const RisePyramidArchitecture: React.FC<RisePyramidArchitectureProps> = (
                       aria-label={`Stage ${pillar.number}: ${pillar.name} — ${pillar.governingQuestion}`}
                     >
                       {/* Left: Distinctive White Number Circle */}
-                      <div className="absolute left-1.5 sm:left-3 w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full bg-white/95 flex items-center justify-center text-[#191817] font-extrabold text-[10px] sm:text-xs md:text-sm shadow-sm flex-shrink-0 transition-transform group-hover:scale-110">
+                      <div className="absolute left-2 sm:left-3.5 w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 rounded-full bg-white/95 flex items-center justify-center text-[#191817] font-extrabold text-[10px] sm:text-xs md:text-sm shadow-sm flex-shrink-0 transition-transform group-hover:scale-110">
                         {pillar.number}
                       </div>
 
-                      {/* Center: Bold Pillar Name (No truncation on mobile) */}
+                      {/* Center: Bold Pillar Name */}
                       <span
-                        className="font-sans font-bold text-[11px] sm:text-sm md:text-base tracking-tight whitespace-nowrap pl-6 pr-1.5 sm:px-9"
+                        className="font-sans font-bold text-xs sm:text-sm md:text-base tracking-tight whitespace-nowrap pl-7 sm:pl-9 pr-2 sm:pr-4"
                         style={{ color: pastel.text }}
                       >
                         {pillar.name}
@@ -125,7 +125,7 @@ export const RisePyramidArchitecture: React.FC<RisePyramidArchitectureProps> = (
 
               {/* Right Symmetrical Balance Spacer to guarantee exact equal left & right spacing */}
               <div
-                className="w-16 sm:w-32 md:w-36 lg:w-40 flex-shrink-0 pr-2.5 sm:pr-9 md:pr-10 py-2 pointer-events-none"
+                className="w-14 sm:w-24 md:w-28 lg:w-32 flex-shrink-0 pr-2 sm:pr-4 md:pr-5 py-2 pointer-events-none"
                 aria-hidden="true"
               />
             </div>

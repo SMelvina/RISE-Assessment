@@ -93,7 +93,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 
         {/* Right Column: Grand RISE Stepped Pyramid Architecture Showcase */}
         <div className="lg:col-span-7 xl:col-span-7 w-full flex items-center justify-center">
-          <div className="w-full max-w-2xl">
+          <div className="w-full max-w-2xl lg:max-w-3xl">
             <RisePyramidArchitecture onSelectPillar={onStart} />
           </div>
         </div>
