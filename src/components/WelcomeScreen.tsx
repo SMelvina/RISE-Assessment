@@ -92,22 +92,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         </div>
 
         {/* Right Column: Grand RISE Stepped Pyramid Architecture Showcase */}
-        <div className="lg:col-span-7 xl:col-span-7">
-          <div className="relative bg-[#011C0E]/85 border border-white/20 backdrop-blur-xl rounded-[12px] p-2 sm:p-6 md:p-8 shadow-2xl overflow-hidden">
-            {/* Ambient inner glow */}
-            <div
-              className="absolute -top-24 -right-24 w-64 h-64 rounded-full blur-3xl opacity-20 pointer-events-none"
-              style={{ background: '#E39F00' }}
-            />
-            <div
-              className="absolute -bottom-24 -left-24 w-64 h-64 rounded-full blur-3xl opacity-25 pointer-events-none"
-              style={{ background: '#024F28' }}
-            />
-
-            {/* The 9-Stage Stepped Pyramid Architecture Component */}
-            <div className="relative z-10">
-              <RisePyramidArchitecture onSelectPillar={onStart} />
-            </div>
+        <div className="lg:col-span-7 xl:col-span-7 w-full flex items-center justify-center">
+          <div className="w-full max-w-2xl">
+            <RisePyramidArchitecture onSelectPillar={onStart} />
           </div>
         </div>
       </main>
