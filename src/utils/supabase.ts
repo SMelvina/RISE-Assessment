@@ -26,7 +26,13 @@ export async function syncSubmissionToSupabase(submission: ParticipantSubmission
       body: JSON.stringify(submission),
     });
 
-    return res.ok;
+    if (!res.ok) {
+      const errText = await res.text();
+      console.warn('Supabase sync failed:', res.status, errText);
+      return false;
+    }
+
+    return true;
   } catch (err) {
     console.warn('Supabase sync warning:', err);
     return false;
@@ -52,7 +58,11 @@ export async function fetchSubmissionsFromSupabase(): Promise<ParticipantSubmiss
       }
     );
 
-    if (!res.ok) return [];
+    if (!res.ok) {
+      const errText = await res.text();
+      console.warn('Supabase fetch failed:', res.status, errText);
+      return [];
+    }
     const data = await res.json();
     return Array.isArray(data) ? (data as ParticipantSubmission[]) : [];
   } catch (err) {

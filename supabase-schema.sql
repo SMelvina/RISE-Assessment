@@ -21,17 +21,28 @@ create table if not exists public.submissions (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- 2. Enable Row Level Security (RLS)
+-- 2. Grant Table & Schema Privileges to Anon & Authenticated roles
+grant usage on schema public to anon, authenticated;
+grant all on table public.submissions to anon, authenticated;
+
+-- 3. Enable Row Level Security (RLS)
 alter table public.submissions enable row level security;
 
--- 3. Allow anonymous public users to submit completed assessments
+-- 4. Allow public users to insert assessments
 drop policy if exists "Allow public assessment submission" on public.submissions;
 create policy "Allow public assessment submission"
   on public.submissions
   for insert
   with check (true);
 
--- 4. Allow public / admin to read assessment telemetry
+-- 5. Allow public users to update/upsert assessments
+drop policy if exists "Allow updating submissions" on public.submissions;
+create policy "Allow updating submissions"
+  on public.submissions
+  for update
+  using (true);
+
+-- 6. Allow reading assessment telemetry for admin dashboard
 drop policy if exists "Allow reading submissions" on public.submissions;
 create policy "Allow reading submissions"
   on public.submissions
